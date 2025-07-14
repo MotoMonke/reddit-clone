@@ -1,6 +1,12 @@
-
-export default function Home() {
+import { getUsers } from "./lib/db";
+export default async function Home() {
+  const users = await getUsers();
   return (
-    <div>Hello World</div>
+    <>
+      <div>{users.map(user=>(
+        <div key={user.id}>{user.username}</div>
+      ))}</div>
+      <p>Hi</p>
+    </>
   );
 }
