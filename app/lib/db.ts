@@ -1,6 +1,7 @@
+'use server'
 import postgres from "postgres";
 import { success } from "zod";
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 const sql = postgres({
     host: "localhost",
     user: "daniil",
