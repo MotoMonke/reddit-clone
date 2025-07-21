@@ -13,8 +13,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
-        <header className="fixed top-0 right-0 left-0 bg-black text-white pt-4 pb-4 pl-4 pr-4 flex justify-between align-middle">
+      <body className="h-screen bg-[#141414]">
+        <header className="fixed bg-[#141414] top-0 right-0 left-0 text-white p-4 flex justify-between align-middle border-b-2 border-b-violet-600">
           <Image src="/logo.svg" width={50} height={50} alt="Logo"/>
           <div className="flex align-middle w-50 justify-between">
             <Image src="/search.svg" width={25} height={25} alt="Search icon"/>
@@ -23,7 +23,7 @@ export default function RootLayout({
             <Image src="/default_profile.svg" width={25} height={25} alt="Profile picture"/>
           </div>
         </header>
-        <main className="mt-22">{children}</main>
+        <main className="mt-22 h-full text-white">{children}</main>
       </body>
     </html>
   );
