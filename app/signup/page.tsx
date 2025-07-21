@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useActionState,useEffect,useState } from "react";
 import {redirect} from "next/navigation";
-import { signup } from "../lib/auth";
+import { signup } from "../lib/actions/auth";
 import { useRouter } from "next/navigation";
 export default function Page(){
     const router = useRouter();

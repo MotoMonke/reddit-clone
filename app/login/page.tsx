@@ -1,5 +1,5 @@
 'use client';
-import {login} from "../lib/auth"
+import {login} from "../lib/actions/auth"
 import { useActionState,useEffect } from "react";
 import Link from 'next/link';
 import { useRouter } from "next/navigation";

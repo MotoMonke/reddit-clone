@@ -22,10 +22,10 @@ export async function verifyToken(token: string) {
   try {
     const { payload } = await jwtVerify(token, secret);
     const id = payload.userId as number;
-    const userCheck = await getUserById(id);
-    if(userCheck===null){
-      throw new Error('no user with such id in database');
-    }
+    //const userCheck = await getUserById(id);
+    //if(userCheck===null){
+    //  throw new Error('no user with such id in database');
+    //}
     console.log(payload);
     return payload;
   } catch (error) {

@@ -1,6 +1,5 @@
 'use server'
 import postgres from "postgres";
-import { success } from "zod";
 import bcrypt from 'bcryptjs';
 const sql = postgres({
     host: "localhost",
@@ -42,6 +41,7 @@ export async function getUserByEmail(email:string,password:string){
     }
     return user;
 }
+//for signup
 export async function createUser(email:string,username:string,password:string){
     const existingEmail:User[] = await sql`
         SELECT * FROM users WHERE email = ${email}
@@ -65,5 +65,18 @@ export async function createUser(email:string,username:string,password:string){
     } catch (error) {
         console.log(error);
         return "internal server error";
+    }
+}
+//posts
+
+export async function insertPost(author_id:number,title:string,text:string|null,imageUrl:string|null){
+    try {
+        const newPost = await sql`
+        INSERT INTO posts (author_id,title,text,image_url)
+        VALUES (${author_id},${title},${text},${imageUrl})
+        `
+        return 'succes';
+    } catch (error) {
+        return `error message: ${error}`
     }
 }

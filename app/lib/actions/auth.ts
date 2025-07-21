@@ -1,10 +1,8 @@
 'use server';
-import { success, z} from 'zod';
-import { signToken } from './jwt';
-import { getUserByEmail,createUser } from './db';
+import { z } from 'zod';
+import { signToken } from '../jwt';
+import { getUserByEmail,createUser } from '../db';
 import { cookies } from 'next/headers';
-import { create } from 'domain';
-import { CLIENT_STATIC_FILES_RUNTIME_WEBPACK } from 'next/dist/shared/lib/constants';
 const FormSchema = z.object({
     email:z.email(),
     username:z.string(),
