@@ -30,7 +30,7 @@ export default function Page(){
                 {file && <img src={file} alt="Uploaded preview" />}
                 <div className="flex justify-end">
                     <button
-                    className="mt-3 mb-5 border border-gray-400 pl-4 pr-4 pt-2 pb-2 rounded-full"
+                    className="mt-3 mb-5 border border-gray-400 pl-4 pr-4 pt-2 pb-2 rounded-full active:bg-gray-400"
                     >Post</button>
                 </div>
                 {isPending&& <div>Processing request...</div>}

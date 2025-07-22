@@ -4,3 +4,8 @@ export type Payload={
     username:string,
     exp:number,
 }
+export type PasswordProps = {
+  changeState: () => void;
+  changePassword: (value: string) => void;
+  password: string;
+};
