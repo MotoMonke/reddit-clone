@@ -2,6 +2,11 @@ import type { Metadata } from "next";
 import Head from "next/head";
 import "./ui/global.css"
 import Image from "next/image";
+import Logo from "./ui/components/icons/logo";
+import CreatePostIcon from "./ui/components/icons/createPostIcon";
+import SearchIcon from "./ui/components/icons/searchIcon";
+import NotificationsIcon from "./ui/components/icons/notificationIcon";
+import ProfileIcon from "./ui/components/icons/profileIcon";
 export const metadata: Metadata = {
   title: "Reddit clone",
   description: "Created for learning purposes",
@@ -19,12 +24,12 @@ export default function RootLayout({
       </Head>
       <body className="h-screen bg-[#141414]">
         <header className="fixed bg-[#141414] top-0 right-0 left-0 text-white p-4 flex justify-between align-middle border-b-2 border-b-violet-600">
-          <Image src="/logo.svg" width={50} height={50} alt="Logo"/>
+          <Logo/>
           <div className="flex align-middle w-50 justify-between">
-            <Image src="/search.svg" width={25} height={25} alt="Search icon"/>
-            <Image src="/new_post.svg" width={25} height={25} alt="Create new post icon"/>
-            <Image src="/notifications.svg" width={25} height={25} alt="Notifications icon"/>
-            <Image src="/default_profile.svg" width={25} height={25} alt="Profile picture"/>
+            <SearchIcon/>
+            <CreatePostIcon/>
+            <NotificationsIcon/>
+            <ProfileIcon/>
           </div>
         </header>
         <main className="mt-22 h-full text-white">{children}</main>
