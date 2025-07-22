@@ -9,3 +9,11 @@ export type PasswordProps = {
   changePassword: (value: string) => void;
   password: string;
 };
+export type PostType ={
+  id:number,
+  author_id:number,
+  created_at:string,
+  title:string,
+  text:string|null,
+  imageUrl:string|null
+}

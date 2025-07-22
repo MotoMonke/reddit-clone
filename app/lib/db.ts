@@ -1,6 +1,7 @@
 'use server'
 import postgres from "postgres";
 import bcrypt from 'bcryptjs';
+import { PostType } from "./types";
 const sql = postgres({
     host: "localhost",
     user: "daniil",
@@ -71,12 +72,24 @@ export async function createUser(email:string,username:string,password:string){
 
 export async function insertPost(author_id:number,title:string,text:string|null,imageUrl:string|null){
     try {
-        const newPost = await sql`
-        INSERT INTO posts (author_id,title,text,image_url)
-        VALUES (${author_id},${title},${text},${imageUrl})
-        `
+            await sql`
+            INSERT INTO posts (author_id,title,text,image_url)
+            VALUES (${author_id},${title},${text},${imageUrl})
+            `
         return 'succes';
     } catch (error) {
         return `error message: ${error}`
+    }
+}
+export async function getPosts(offset:number,limit:number){
+    try {
+        const postArray = await sql`
+        SELECT * FROM posts LIMIT ${limit} OFFSET ${offset}
+        `
+        console.log(postArray)
+        return postArray as unknown as PostType[];
+    } catch (error) {
+        console.log(error);
+        return [];
     }
 }

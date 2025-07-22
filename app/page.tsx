@@ -1,7 +1,8 @@
+import { PostsScroll } from "./ui/components/postScroll/postScroll";
 export default async function Home() {
   return (
     <>
-      <p className="text-green-500">Hi</p>
+      <PostsScroll/>
     </>
   );
 }

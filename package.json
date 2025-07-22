@@ -20,6 +20,7 @@
     "postgres": "^3.4.7",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-intersection-observer": "^9.16.0",
     "zod": "^4.0.5"
   },
   "devDependencies": {
