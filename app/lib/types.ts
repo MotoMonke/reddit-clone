@@ -15,5 +15,5 @@ export type PostType ={
   created_at:string,
   title:string,
   text:string|null,
-  imageUrl:string|null
+  image_url:string|null
 }
