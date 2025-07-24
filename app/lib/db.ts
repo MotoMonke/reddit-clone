@@ -2,6 +2,7 @@
 import postgres from "postgres";
 import bcrypt from 'bcryptjs';
 import { PostType } from "./types";
+import type { Comments } from "./types";
 const sql = postgres({
     host: "localhost",
     user: "daniil",
@@ -93,3 +94,43 @@ export async function getPosts(offset:number,limit:number){
         return [];
     }
 }
+
+function buildTree(flatList:Comments[]){
+    const idMap:any = {};
+    const tree:any = [];
+    flatList.forEach(comment => {
+        idMap[comment.id] = {...comment,children: []}
+    });
+    flatList.forEach(comment=>{
+        if(comment.parent_id === null) {
+            tree.push(idMap[comment.id]);
+        } else {
+            const parent = idMap[comment.parent_id];
+            if (parent) {
+                parent.children.push(idMap[comment.id]);
+            }
+        }
+    })
+    return tree;
+}
+
+export async function getPostAndComments(postId:number){
+    try {
+        const result = await sql`
+        SELECT * FROM posts WHERE id=${postId}
+        `
+        const post = result[0] as PostType;
+        const comments:Comments[] = await sql`
+        SELECT * FROM comments WHERE post_id=${postId}
+        `
+        if(comments.length>0){
+            const tree = buildTree(comments);
+            return ({post:post,tree:tree})
+        }
+        return {post:post,tree:[]};
+    } catch (error) {
+        console.log(error)
+        return `error message: ${error}`;
+    }
+}
+getPostAndComments(111);

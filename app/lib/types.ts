@@ -12,8 +12,17 @@ export type PasswordProps = {
 export type PostType ={
   id:number,
   author_id:number,
-  created_at:string,
+  created_at:Date,
   title:string,
   text:string|null,
   image_url:string|null
+}
+export type Comment = {
+  id:number,
+  author_id:number,
+  post_id:number,
+  parent_id:number|null,
+  body:string,
+  created_at:Date,
+  children?:Comment[],
 }
