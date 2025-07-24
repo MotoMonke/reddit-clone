@@ -2,7 +2,7 @@ import { getPostAndComments } from "@/app/lib/db";
 import PostCard from "@/app/ui/components/postScroll/postCard";
 import { PostType } from "@/app/lib/types";
 import { Comment } from "@/app/lib/types";
-import CommentsTree from "@/app/ui/components/commentsTree";
+import CommentsTree from "@/app/ui/components/comments/commentsTree";
 export default async function PostPage({ params }: { params: Promise<{ id: number }> }) {
   const id = (await params).id;
   const result = await getPostAndComments(id);
@@ -14,7 +14,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: numbe
   return (
     <div>
       <PostCard {...post} />
-      <CommentsTree comments={comments}/>
+      <CommentsTree comments={comments} postId={id}/>
     </div>
   );
 }

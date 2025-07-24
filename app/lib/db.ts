@@ -1,8 +1,9 @@
 'use server'
 import postgres from "postgres";
 import bcrypt from 'bcryptjs';
-import { PostType } from "./types";
-import type { Comments } from "./types";
+import type { PostType } from "./types";
+import type { Comment } from "./types"
+import type { User } from "./types";
 const sql = postgres({
     host: "localhost",
     user: "daniil",
@@ -11,12 +12,7 @@ const sql = postgres({
     port: 5432
 });
 
-type User = {
-    id:number,
-    email:string,
-    password:string,
-    username:string,
-}
+
 //for verifyToken
 export async function getUserById(id:number){
     const user:User[] = await sql`
@@ -95,7 +91,7 @@ export async function getPosts(offset:number,limit:number){
     }
 }
 
-function buildTree(flatList:Comments[]){
+function buildTree(flatList:Comment[]){
     const idMap:any = {};
     const tree:any = [];
     flatList.forEach(comment => {
@@ -120,7 +116,7 @@ export async function getPostAndComments(postId:number){
         SELECT * FROM posts WHERE id=${postId}
         `
         const post = result[0] as PostType;
-        const comments:Comments[] = await sql`
+        const comments:Comment[] = await sql`
         SELECT * FROM comments WHERE post_id=${postId}
         `
         if(comments.length>0){
@@ -133,4 +129,16 @@ export async function getPostAndComments(postId:number){
         return `error message: ${error}`;
     }
 }
-getPostAndComments(111);
+export async function createComment(authorId:number,postId:number,parentId:number|null,body:string){
+    try {
+        const result = await sql`
+        INSERT INTO comments (author_id,post_id,parent_id,body) 
+        VALUES (${authorId},${postId},${parentId},${body})
+        RETURNING *
+        `
+        return result[0] as unknown as Comment;
+    } catch (error) {
+        console.log(error);
+        return `error message: ${error}`;
+    }
+}

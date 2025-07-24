@@ -23,6 +23,12 @@ export type Comment = {
   post_id:number,
   parent_id:number|null,
   body:string,
-  created_at:Date,
+  created_at?:Date,
   children?:Comment[],
+}
+export type User = {
+    id:number,
+    email:string,
+    password:string,
+    username:string,
 }

@@ -1,5 +1,7 @@
+'use server';
 import { SignJWT, jwtVerify } from "jose";
 import { getUserById } from "./db";
+import { cookies } from "next/headers";
 const JWT_SECRET = process.env.JWT_SECRET!;
 if (!JWT_SECRET) {
   throw new Error('JWT_SECRET is not defined');
@@ -18,7 +20,7 @@ export async function signToken(payload: JwtPayload) {
   return token;
 }
 
-export async function verifyToken(token: string) {
+export async function verifyTokenForMiddleware(token: string) {
   try {
     const { payload } = await jwtVerify(token, secret);
     const id = payload.userId as number;
@@ -28,6 +30,26 @@ export async function verifyToken(token: string) {
     //}
     console.log(payload);
     return payload;
+  } catch (error) {
+    console.error('Token verification failed:', error);
+    return null;
+  }
+}
+export async function verifyToken() {
+  try {
+    const cookieStore = await cookies()
+    const tokenCookie = cookieStore.get('token');
+    if(!tokenCookie){
+      return null;
+    }
+    const { payload } = await jwtVerify(tokenCookie.value, secret);
+    const id = payload.userId as number;
+    const userCheck = await getUserById(id);
+    if(userCheck===null){
+      throw new Error('no user with such id in database');
+    }
+    console.log(payload);
+    return id;
   } catch (error) {
     console.error('Token verification failed:', error);
     return null;
