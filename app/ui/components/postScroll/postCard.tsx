@@ -1,6 +1,8 @@
+'use client'
 import type { PostType } from "@/app/lib/types"
 import Image from "next/image"
 import ComentsIcon from "../icons/comentsIcon"
+import Votes from "../votes/votes"
 export default function PostCard({...post}: PostType){
     console.log(post.image_url)
     return (
@@ -10,6 +12,7 @@ export default function PostCard({...post}: PostType){
             {post.image_url!==null&&<Image src={post.image_url!} width={100} height={100} alt="post image"/>}
             {post.text!==null&&<div>{post.text}</div>}
             <ComentsIcon id={post.id}/>
+            <Votes postId={post.id} isPost={true}/>
         </div>
     )
 }

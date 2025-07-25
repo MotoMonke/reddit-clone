@@ -142,3 +142,58 @@ export async function createComment(authorId:number,postId:number,parentId:numbe
         return `error message: ${error}`;
     }
 }
+//votes(like/dislike for posts and comments)
+export async function votePost(vote:boolean,userId:number,postId:number){
+    try {
+        const existing = await sql`
+        SELECT vote FROM post_votes
+        WHERE user_id = ${userId} AND post_id = ${postId}
+        `
+        if(existing.length===0){
+            await sql`
+            INSERT INTO post_votes (user_id,post_id,vote)
+            VALUES (${userId},${postId},${vote})
+            `
+        }else if(existing[0].vote===vote){
+            await sql`
+            DELETE FROM post_votes
+            WHERE user_id = ${userId} AND post_id = ${postId}
+            `
+        }else{
+            await sql`
+            UPDATE post_votes
+            SET vote = ${vote}
+            WHERE user_id = ${userId} AND post_id = ${postId}
+            `
+        }
+    } catch (error) {
+        console.log(error);
+    }
+}
+export async function getPostVotesAmount(postId:number){
+    const result1 = await sql`
+    SELECT COUNT(*) FROM post_votes
+    WHERE post_id = ${postId} AND vote = true
+    `
+    const result2 = await sql`
+    SELECT COUNT(*) FROM post_votes
+    WHERE post_id = ${postId} AND vote = false
+    `
+    const upVotes = Number(result1[0].count??0);
+    const downVotes = Number(result2[0].count??0);
+    //for some reason .count returns 1 when its value is 0
+    return {upVotes,downVotes};
+}
+export async function checkPostVote(postId:number,userId:number){
+    //return true false or null
+    //true means upvote, false means downvote, null means no vote
+    const result = await sql`
+    SELECT * FROM post_votes
+    WHERE post_id=${postId} AND user_id=${userId}
+    `
+    if(result.length===0){
+        return null;
+    }else{
+        return result[0].vote;
+    }
+}
