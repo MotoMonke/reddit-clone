@@ -142,6 +142,19 @@ export async function createComment(authorId:number,postId:number,parentId:numbe
         return `error message: ${error}`;
     }
 }
+export async function getAmountOfComments(postId:number){
+    try {
+        const result = await sql`
+        SELECT COUNT(*) FROM comments
+        WHERE post_id = ${postId}
+        `
+        const count = Number(result[0].count??0);
+        console.log(count);
+        return count;
+    } catch (error) {
+        console.log(error);
+    }
+}
 //votes(like/dislike for posts and comments)
 //posts
 export async function votePost(vote:boolean,userId:number,postId:number){
