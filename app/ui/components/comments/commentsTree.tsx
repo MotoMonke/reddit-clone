@@ -2,6 +2,7 @@
 import type { Comment } from "@/app/lib/types";
 import CommnetInput from "./commentInput";
 import { useState } from "react";
+import Votes from "../votes/votes";
 interface CommentsTreeProps{
     comments:Comment[],
     postId:number
@@ -33,6 +34,7 @@ function OneComment({comment,postId}:OneCommentProps){
     return(
         <div className="ml-10">
             <p>{comment.body}</p>
+            <Votes isPost={false} id={comment.id}/>
             <CommnetInput postId={postId} parentId={comment.id} onCommentCreated={onCommentCreated} />
             {commentArray && commentArray.length>0 && (
                 <div>

@@ -12,7 +12,7 @@ export default function PostCard({...post}: PostType){
             {post.image_url!==null&&<Image src={post.image_url!} width={100} height={100} alt="post image"/>}
             {post.text!==null&&<div>{post.text}</div>}
             <ComentsIcon id={post.id}/>
-            <Votes postId={post.id} isPost={true}/>
+            <Votes id={post.id} isPost={true}/>
         </div>
     )
 }

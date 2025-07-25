@@ -1,23 +1,24 @@
 'use lient';
 import { useState,useEffect } from 'react';
-import { getPostVotesAmount,checkPostVote,votePost } from '@/app/lib/db';
+import { getPostVotesAmount,checkPostVote,votePost,voteComment,getCommentVotesAmount,checkCommentVote } from '@/app/lib/db';
 import { verifyToken } from '@/app/lib/jwt';
 import { redirect } from 'next/navigation';
 import Image from 'next/image';
 interface VotesInterface {
-  postId: number;
+  id: number;
   isPost: boolean;
 }
 
-export default function Votes({ postId,isPost }:VotesInterface) {
+export default function Votes({ id,isPost }:VotesInterface) {
     const [likesAmount,setLikesAmount] = useState(0);
     const [dislikesAmount,setDislikesAmount] = useState(0);
     const [userId,setUserId] = useState<null|number>(null);
     //true means upvote, false means downvote, null means no vote
     const [voted,setVoted] = useState<null|true|false>(null);
+    const functions = isPost?{getAmount:getPostVotesAmount,checkVote:checkPostVote,vote:votePost}:{getAmount:getCommentVotesAmount,checkVote:checkCommentVote,vote:voteComment};
     useEffect(()=>{
         async function getVotes(){
-            const { upVotes, downVotes } = isPost?await getPostVotesAmount(postId):await getPostVotesAmount(postId);
+            const { upVotes, downVotes } = await functions.getAmount(id);
             setLikesAmount(upVotes);
             setDislikesAmount(downVotes);
         }
@@ -33,12 +34,12 @@ export default function Votes({ postId,isPost }:VotesInterface) {
     },[]);
     useEffect(()=>{
         if(userId!==null){
-            async function checkVote(){
+            async function checkIfVoted(){
                 //returns null true or false
-                const result = await checkPostVote(postId,userId!);
+                const result = await functions.checkVote(id,userId!);
                 setVoted(result);
             }
-            checkVote();
+            checkIfVoted();
         }
     },[userId])
     async function vote(value:boolean){
@@ -69,7 +70,7 @@ export default function Votes({ postId,isPost }:VotesInterface) {
                     setDislikesAmount(prev=>prev-1);
                 }
             }
-            await votePost(value,userId,postId);
+            await functions.vote(value,userId,id);
         }else{
             redirect('/login');
         }

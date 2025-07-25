@@ -143,6 +143,7 @@ export async function createComment(authorId:number,postId:number,parentId:numbe
     }
 }
 //votes(like/dislike for posts and comments)
+//posts
 export async function votePost(vote:boolean,userId:number,postId:number){
     try {
         const existing = await sql`
@@ -181,7 +182,6 @@ export async function getPostVotesAmount(postId:number){
     `
     const upVotes = Number(result1[0].count??0);
     const downVotes = Number(result2[0].count??0);
-    //for some reason .count returns 1 when its value is 0
     return {upVotes,downVotes};
 }
 export async function checkPostVote(postId:number,userId:number){
@@ -190,6 +190,60 @@ export async function checkPostVote(postId:number,userId:number){
     const result = await sql`
     SELECT * FROM post_votes
     WHERE post_id=${postId} AND user_id=${userId}
+    `
+    if(result.length===0){
+        return null;
+    }else{
+        return result[0].vote;
+    }
+}
+//coments
+export async function voteComment(vote:boolean,userId:number,commentId:number){
+    try {
+        const existing = await sql`
+        SELECT vote FROM comment_votes
+        WHERE user_id = ${userId} AND comment_id = ${commentId}
+        `
+        if(existing.length===0){
+            await sql`
+            INSERT INTO comment_votes (user_id,comment_id,vote)
+            VALUES (${userId},${commentId},${vote})
+            `
+        }else if(existing[0].vote===vote){
+            await sql`
+            DELETE FROM comment_votes
+            WHERE user_id = ${userId} AND comment_id = ${commentId}
+            `
+        }else{
+            await sql`
+            UPDATE comment_votes
+            SET vote = ${vote}
+            WHERE user_id = ${userId} AND comment_id = ${commentId}
+            `
+        }
+    } catch (error) {
+        console.log(error);
+    }
+}
+export async function getCommentVotesAmount(commentId:number){
+    const result1 = await sql`
+    SELECT COUNT(*) FROM comment_votes
+    WHERE comment_id = ${commentId} AND vote = true
+    `
+    const result2 = await sql`
+    SELECT COUNT(*) FROM comment_votes
+    WHERE comment_id = ${commentId} AND vote = false
+    `
+    const upVotes = Number(result1[0].count??0);
+    const downVotes = Number(result2[0].count??0);
+    return {upVotes,downVotes};
+}
+export async function checkCommentVote(commentId:number,userId:number){
+    //return true false or null
+    //true means upvote, false means downvote, null means no vote
+    const result = await sql`
+    SELECT * FROM comment_votes
+    WHERE comment_id=${commentId} AND user_id=${userId}
     `
     if(result.length===0){
         return null;
