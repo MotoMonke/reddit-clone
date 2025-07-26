@@ -4,8 +4,13 @@ import { PostType } from "@/app/lib/types";
 import PostCard from "./postCard";
 import { getPosts } from "@/app/lib/db";
 import { useInView } from "react-intersection-observer";
+interface PostListInterface{
+    initialPostsArray: PostType[],
+    userId:number|null,
+    type:0|1|2|null
+}
 const number_of_posts_to_fetch = 10;
-export default function PostList({ initialPostsArray }: { initialPostsArray: PostType[] }){
+export default function PostList({ initialPostsArray,userId,type }:PostListInterface){
     const [posts, setPosts] = useState<PostType[]>(initialPostsArray);
     const [offset,setOffset] = useState(number_of_posts_to_fetch);
     const [hasMore,setHasMore] = useState(true);
@@ -13,7 +18,7 @@ export default function PostList({ initialPostsArray }: { initialPostsArray: Pos
     const {ref,inView} = useInView();
     async function loadMorePosts(){
         setIsLoading(true);
-        const newPosts = await getPosts(offset,number_of_posts_to_fetch);
+        const newPosts = await getPosts(offset,number_of_posts_to_fetch,userId,type);
         setPosts(posts=>[...posts,...newPosts]);
         setOffset(offset => offset + number_of_posts_to_fetch);
         if(newPosts.length<10){

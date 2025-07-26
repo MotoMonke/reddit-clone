@@ -78,6 +78,7 @@ export async function insertPost(author_id:number,title:string,text:string|null,
         return `error message: ${error}`
     }
 }
+/*
 export async function getPosts(offset:number,limit:number){
     try {
         const postArray = await sql`
@@ -90,6 +91,7 @@ export async function getPosts(offset:number,limit:number){
         return [];
     }
 }
+*/
 
 function buildTree(flatList:Comment[]){
     const idMap:any = {};
@@ -262,5 +264,81 @@ export async function checkCommentVote(commentId:number,userId:number){
         return null;
     }else{
         return result[0].vote;
+    }
+}
+//refactored get posts
+export async function getPosts(offset:number,limit:number,userId:number|null,type:0|1|2|null): Promise<PostType[]>{
+    //type values:
+    //0 -- get posts that are created by user
+    //1 -- get posts that are commented by user
+    //2 -- get posts that are voted by user
+    if(userId===null&&type===null){
+        try {
+            const postArray = await sql`
+            SELECT * FROM posts LIMIT ${limit} OFFSET ${offset}
+            `
+            console.log(postArray)
+            return postArray as unknown as PostType[];
+        } catch (error) {
+            console.log(error);
+            return [];
+        }
+    }else if(type===0){
+        try {
+            const postArray = await sql`
+            SELECT * FROM posts 
+            WHERE author_id = ${userId!}
+            LIMIT ${limit} OFFSET ${offset} 
+            `
+            console.log(postArray)
+            return postArray as unknown as PostType[];
+        } catch (error) {
+            console.log(error);
+            return [];
+        }
+    }else if(type===1){
+        try {
+            const comentedPostsIds = await sql`
+            SELECT DISTINCT post_id FROM comments WHERE author_id = ${userId!}
+            `
+            console.log(comentedPostsIds);
+            const ids =comentedPostsIds.map(row=>row.post_id);
+            console.log("IDS:", ids);
+            if(ids.length===0){
+                return [];
+            }
+            const postArray = await sql`
+            SELECT * FROM posts
+            WHERE id = ANY(${ids})
+            LIMIT ${limit} OFFSET ${offset}
+            `
+            return postArray as unknown as PostType[];
+        } catch (error) {
+            console.log(error);
+            return [];
+        }
+    }else if(type===2){
+        try {
+            const votedPostsIds = await sql`
+            SELECT DISTINCT post_id FROM post_votes WHERE user_id = ${userId!}
+            `
+            console.log(votedPostsIds);
+            const ids = votedPostsIds.map(row=>row.post_id);
+            console.log("IDS:", ids);
+            if(ids.length===0){
+                return [];
+            }
+            const postArray = await sql`
+            SELECT * FROM posts
+            WHERE id = ANY(${ids})
+            LIMIT ${limit} OFFSET ${offset}
+            `
+            return postArray as unknown as PostType[];
+        } catch (error) {
+            console.log(error);
+            return [];
+        }
+    }else{
+        return [];
     }
 }

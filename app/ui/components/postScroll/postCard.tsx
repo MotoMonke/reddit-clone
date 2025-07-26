@@ -1,7 +1,7 @@
 'use client'
 import type { PostType } from "@/app/lib/types"
 import Image from "next/image"
-import ComentsIcon from "../icons/comentsIcon"
+import ComentsIcon from "../header/icons/comentsIcon"
 import Votes from "../votes/votes"
 export default function PostCard({...post}: PostType){
     console.log(post.image_url)

@@ -2,11 +2,10 @@ import type { Metadata } from "next";
 import Head from "next/head";
 import "./ui/global.css"
 import Image from "next/image";
-import Logo from "./ui/components/icons/logo";
-import CreatePostIcon from "./ui/components/icons/createPostIcon";
-import SearchIcon from "./ui/components/icons/searchIcon";
-import NotificationsIcon from "./ui/components/icons/notificationIcon";
-import ProfileIcon from "./ui/components/icons/profileIcon";
+import Logo from "./ui/components/header/icons/logo";
+import CreatePostIcon from "./ui/components/header/icons/createPostIcon";
+import SearchIcon from "./ui/components/header/icons/searchIcon";
+import NotificationsAndProfile from "./ui/components/header/notificationsAndProfile";
 export const metadata: Metadata = {
   title: "Reddit clone",
   description: "Created for learning purposes",
@@ -28,8 +27,7 @@ export default function RootLayout({
           <div className="flex align-middle w-50 justify-between">
             <SearchIcon/>
             <CreatePostIcon/>
-            <NotificationsIcon/>
-            <ProfileIcon/>
+            <NotificationsAndProfile/>
           </div>
         </header>
         <main className="mt-22 h-full text-white">{children}</main>
