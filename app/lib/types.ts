@@ -31,4 +31,5 @@ export type User = {
     email:string,
     password:string,
     username:string,
+    profile_img_url:string|null,
 }

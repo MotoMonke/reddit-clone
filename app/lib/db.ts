@@ -342,3 +342,24 @@ export async function getPosts(offset:number,limit:number,userId:number|null,typ
         return [];
     }
 }
+export async function editUser(userId:number,username:string,email:string,profileImgUrl:null|string){
+    try {
+        if(profileImgUrl===null){
+            await sql `
+            UPDATE users
+            SET username = ${username}, email = ${email}
+            WHERE id = ${userId}
+            `
+        }else{
+            await sql `
+            UPDATE users
+            SET username = ${username}, email = ${email}, profile_img_url = ${profileImgUrl}
+            WHERE id = ${userId}
+            `
+        }
+        return 'success!';
+    } catch (error) {
+        console.log(error);
+        return `Error message: ${error}`
+    }
+}

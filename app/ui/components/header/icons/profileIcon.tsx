@@ -14,7 +14,7 @@ export default function ProfileIcon({userId}:ProfileIconInterface){
                 <div className="fixed right-0 mt-2 w-48 bg-white text-black rounded shadow-lg z-50">
                 <ul className="py-2">
                     <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer" onClick={()=>redirect(`/user/${userId}`)}>Profile</li>
-                    <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">Settings</li>
+                    <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer" onClick={()=>redirect('/settings')}>Settings</li>
                     <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">Log out</li>
                 </ul>
                 </div>
