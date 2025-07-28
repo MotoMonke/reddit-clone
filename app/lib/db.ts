@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import type { PostType } from "./types";
 import type { Comment } from "./types"
 import type { User } from "./types";
+import type { Notification } from "./types";
 const sql = postgres({
     host: "localhost",
     user: "daniil",
@@ -138,6 +139,7 @@ export async function createComment(authorId:number,postId:number,parentId:numbe
         VALUES (${authorId},${postId},${parentId},${body})
         RETURNING *
         `
+        await createNotification(postId,authorId,parentId);
         return result[0] as unknown as Comment;
     } catch (error) {
         console.log(error);
@@ -361,5 +363,96 @@ export async function editUser(userId:number,username:string,email:string,profil
     } catch (error) {
         console.log(error);
         return `Error message: ${error}`
+    }
+}
+//creating notifications, they are going to be created when someone comments under user post(first tree level comment) or someone answers to user comment
+async function createNotification(post_id:number,author_id:number,comment_id:number|null) {
+    //comment_id stands for id of coment that users replies to, if it's null notification will be sent to post author, else to comment author
+    const answer = await sql`
+        SELECT author_id FROM posts WHERE id = ${post_id}
+    `
+    const post_author_id = answer[0].author_id as number;
+    if(comment_id===null){
+        if(post_author_id===author_id){
+            return;
+        }
+        try {
+            await sql`
+                INSERT INTO notifications (post_id,author_id,receiver_id)
+                VALUES (${post_id},${author_id},${post_author_id})
+            `
+        } catch (error) {
+            console.log(error);
+        }
+    }else{
+        //it seems like this function don't need comment id, but:
+        //if comment is an answer to another comment then using comment id function will find
+        //author of comment id and set receiver id to it
+        try {
+            const answer = await sql`
+            SELECT * FROM comments WHERE id = ${comment_id}
+            `
+            if(answer.length===0){
+                throw new Error('comment not found');
+            }
+            const comment = answer[0] as Comment;
+            if(comment.author_id===author_id){
+                return;
+            }
+            await sql `
+                INSERT INTO notifications (post_id,author_id,receiver_id,comment_id)
+                VALUES (${post_id},${author_id},${comment.author_id},${comment_id})
+            `
+        } catch (error) {
+            console.log(error);
+        }
+    }
+}
+export async function getNotifications(userId:number){
+    try {
+        const notifications:Notification[] = await sql`
+        SELECT * FROM notifications WHERE receiver_id = ${userId}
+        `
+        if(notifications.length>0){
+            return notifications;
+        }else{
+            return [];
+        }
+    } catch (error) {
+        console.log(error);
+        return `error message: ${error}`
+    }
+}
+export async function getNotificationsCount(userId:number){
+    try {
+        const result = await sql`
+        SELECT COUNT(*) FROM notifications
+        WHERE receiver_id = ${userId} AND is_read = false
+        `
+        const count = Number(result[0].count??0);
+        return count;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}
+export async function markNotificationsAsRead(userId:number){
+    try {
+        await sql`
+        UPDATE notifications
+        SET is_read = true
+        WHERE receiver_id = ${userId} AND is_read = false
+        `
+    } catch (error) {
+        console.log(error);
+    }
+}
+export async function deleteNotifications(userId:number){
+    try {
+        await sql`
+        DELETE FROM notifications WHERE receiver_id = ${userId}
+        `
+    } catch (error) {
+        console.log(error);
     }
 }

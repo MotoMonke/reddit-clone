@@ -1,5 +1,4 @@
 'use clinet';
-import { redirect } from "next/navigation";
 import { useState,useEffect } from "react";
 import { getUserById } from "@/app/lib/db";
 import Image from "next/image";

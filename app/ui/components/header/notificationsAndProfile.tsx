@@ -30,7 +30,7 @@ export default function NotificationsAndProfile(){
             <div>
                 {/*if userId is null that means isLoggedIn is false so this elements will not render, so it's safe to pass userId(null|number) here */}
                 <ProfileIcon userId={userId!}/>
-                <NotificationsIcon/>    
+                <NotificationsIcon userId={userId!}/>     
             </div>}
             {!isLoggedIn&&<div className="hover:cursor-pointer" onClick={handleClick}>Login</div>}
         </div>

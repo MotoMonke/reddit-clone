@@ -33,3 +33,12 @@ export type User = {
     username:string,
     profile_img_url:string|null,
 }
+export type Notification = {
+  id:number,
+  post_id:number,
+  author_id:number,
+  receiver_id:number,
+  comment_id:number|null,
+  is_read:boolean,
+  created_at:Date
+}
