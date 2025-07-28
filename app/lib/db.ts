@@ -269,7 +269,7 @@ export async function checkCommentVote(commentId:number,userId:number){
     }
 }
 //refactored get posts
-export async function getPosts(offset:number,limit:number,userId:number|null,type:0|1|2|null): Promise<PostType[]>{
+export async function getPosts(offset:number,userId:number|null,type:0|1|2|null): Promise<PostType[]>{
     //type values:
     //0 -- get posts that are created by user
     //1 -- get posts that are commented by user
@@ -277,7 +277,7 @@ export async function getPosts(offset:number,limit:number,userId:number|null,typ
     if(userId===null&&type===null){
         try {
             const postArray = await sql`
-            SELECT * FROM posts LIMIT ${limit} OFFSET ${offset}
+            SELECT * FROM posts LIMIT 10 OFFSET ${offset}
             `
             console.log(postArray)
             return postArray as unknown as PostType[];
@@ -290,7 +290,7 @@ export async function getPosts(offset:number,limit:number,userId:number|null,typ
             const postArray = await sql`
             SELECT * FROM posts 
             WHERE author_id = ${userId!}
-            LIMIT ${limit} OFFSET ${offset} 
+            LIMIT 10 OFFSET ${offset} 
             `
             console.log(postArray)
             return postArray as unknown as PostType[];
@@ -312,7 +312,7 @@ export async function getPosts(offset:number,limit:number,userId:number|null,typ
             const postArray = await sql`
             SELECT * FROM posts
             WHERE id = ANY(${ids})
-            LIMIT ${limit} OFFSET ${offset}
+            LIMIT 10 OFFSET ${offset}
             `
             return postArray as unknown as PostType[];
         } catch (error) {
@@ -333,7 +333,7 @@ export async function getPosts(offset:number,limit:number,userId:number|null,typ
             const postArray = await sql`
             SELECT * FROM posts
             WHERE id = ANY(${ids})
-            LIMIT ${limit} OFFSET ${offset}
+            LIMIT 10 OFFSET ${offset}
             `
             return postArray as unknown as PostType[];
         } catch (error) {
@@ -343,6 +343,12 @@ export async function getPosts(offset:number,limit:number,userId:number|null,typ
     }else{
         return [];
     }
+}
+//i wrote this function to pass it as prop to postList.tsx in postScroll.tsx
+//it's just getPosts with(offset,null,null) arguments
+export async function getPostsForGlobalFeed(offset:number){
+    const result:PostType[] = await getPosts(offset,null,null);
+    return result;
 }
 export async function editUser(userId:number,username:string,email:string,profileImgUrl:null|string){
     try {
