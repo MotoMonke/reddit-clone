@@ -5,6 +5,7 @@ import type { PostType } from "./types";
 import type { Comment } from "./types"
 import type { User } from "./types";
 import type { Notification } from "./types";
+import { off } from "node:process";
 const sql = postgres({
     host: "localhost",
     user: "daniil",
@@ -345,11 +346,30 @@ export async function getPosts(offset:number,userId:number|null,type:0|1|2|null)
     }
 }
 //i wrote this function to pass it as prop to postList.tsx in postScroll.tsx
+//because postScroll is server component and i can't define functions with it
+//why define separete function? 'cause postList accepts fetchFn(offset) func that returns PostType[]
+//but getPosts is(offset,userId,type), i think you get it 
 //it's just getPosts with(offset,null,null) arguments
 export async function getPostsForGlobalFeed(offset:number){
     const result:PostType[] = await getPosts(offset,null,null);
     return result;
 }
+//searching posts
+export async function searchPosts(offset:number,query:string){
+    try {
+        const keyword = `%${query}%`;
+        const postArray:PostType[] = await sql`
+        SELECT * FROM posts
+        WHERE title ILIKE ${keyword} OR text ILIKE ${keyword}
+        LIMIT 10 OFFSET ${offset}
+        `
+        return postArray;
+    } catch (error) {
+        console.log(error);
+        return [];
+    }
+}
+
 export async function editUser(userId:number,username:string,email:string,profileImgUrl:null|string){
     try {
         if(profileImgUrl===null){

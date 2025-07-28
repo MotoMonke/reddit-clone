@@ -39,18 +39,6 @@ export default function UserPage({userId}:UserPageInterface){
         }
         populateState();
     },[]);
-    async function fetchFn0(offset:number){
-        const result:PostType[] = await getPosts(offset,userId,0);
-        return result;
-    }
-    async function fetchFn1(offset:number){
-        const result:PostType[] = await getPosts(offset,userId,1);
-        return result;
-    }
-    async function fetchFn2(offset:number){
-        const result:PostType[] = await getPosts(offset,userId,2);
-        return result;
-    }
     if(loading){
         return <div>Loading...</div>
     }
@@ -68,9 +56,9 @@ export default function UserPage({userId}:UserPageInterface){
                 {option===2&&<div className="hover:cursor-pointer bg-blue-700">Voted</div>}
                 {option!==2&&<div className="hover:cursor-pointer" onClick={()=>setOption(2)}>Voted</div>}
             </div>
-            {option===0&&<PostList initialPostsArray={posts} fetchFn={fetchFn0}/>}
-            {option===1&&<PostList initialPostsArray={comments} fetchFn={fetchFn1}/>}
-            {option===2&&<PostList initialPostsArray={voted} fetchFn={fetchFn2}/>}
+            {option===0&&<PostList initialPostsArray={posts} fetchFn={(offset)=>getPosts(offset,userId,0)}/>}
+            {option===1&&<PostList initialPostsArray={comments} fetchFn={(offset)=>getPosts(offset,userId,1)}/>}
+            {option===2&&<PostList initialPostsArray={voted} fetchFn={(offset)=>getPosts(offset,userId,2)}/>}
         </div>
     )
 }
