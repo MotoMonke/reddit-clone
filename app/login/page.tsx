@@ -1,5 +1,5 @@
 'use client';
-import {login} from "../lib/actions/auth"
+import {login,lazyLogin} from "../lib/actions/auth"
 import { useActionState,useEffect,useState } from "react";
 import Link from 'next/link';
 import { useRouter } from "next/navigation";
@@ -7,6 +7,7 @@ import { VisiblePassword,NotVisiblePassword } from "../ui/components/authForms/e
 export default function Page(){
     const router = useRouter();
     const [state,formAction] = useActionState(login,{});
+    const [lazyState,lazyFormAction] = useActionState(lazyLogin,{});
     const [passwordIsVisible,setPasswordIsVisible] = useState(false);
     const [passwordValue,setPasswordValue] = useState("");
     useEffect(()=>{
@@ -14,6 +15,11 @@ export default function Page(){
             router.push("/");
         }
     },[state])
+    useEffect(()=>{
+        if(lazyState.success){
+            router.push("/");
+        }
+    },[lazyState])
     function handleClick(){
         setPasswordIsVisible(!passwordIsVisible);
     }
@@ -36,6 +42,10 @@ export default function Page(){
                     className="mt-3 mb-5 border border-gray-400 pl-4 pr-4 pt-2 pb-2 rounded-full active:bg-gray-400 hover:cursor-pointer"
                 >Submit</button>
                 {state.error && <p className="text-red-500">{state.error}</p>}
+            </form>
+            <form action={lazyFormAction}>
+                <button type="submit">Login as guest</button>
+                {lazyState.error && <p className="text-red-500">{lazyState.error}</p>}
             </form>
             <p className="mt-5">
                 Don't have an account? 

@@ -10,8 +10,6 @@ if(!connectionString){
     throw new Error('no connection string provided')
 }
 const sql = postgres(connectionString);
-
-
 //for verifyToken
 export async function getUserById(id:number){
     const user:User[] = await sql`
