@@ -5,14 +5,11 @@ import type { PostType } from "./types";
 import type { Comment } from "./types"
 import type { User } from "./types";
 import type { Notification } from "./types";
-import { off } from "node:process";
-const sql = postgres({
-    host: "localhost",
-    user: "daniil",
-    database: "reddit_clone",
-    password: "332107",
-    port: 5432
-});
+const connectionString = process.env.PSQL
+if(!connectionString){
+    throw new Error('no connection string provided')
+}
+const sql = postgres(connectionString);
 
 
 //for verifyToken
@@ -278,7 +275,7 @@ export async function getPosts(offset:number,userId:number|null,type:0|1|2|null)
     if(userId===null&&type===null){
         try {
             const postArray = await sql`
-            SELECT * FROM posts LIMIT 10 OFFSET ${offset}
+            SELECT * FROM posts ORDER BY created_at DESC LIMIT 10 OFFSET ${offset}
             `
             console.log(postArray)
             return postArray as unknown as PostType[];
@@ -291,6 +288,7 @@ export async function getPosts(offset:number,userId:number|null,type:0|1|2|null)
             const postArray = await sql`
             SELECT * FROM posts 
             WHERE author_id = ${userId!}
+            ORDER BY created_at DESC
             LIMIT 10 OFFSET ${offset} 
             `
             console.log(postArray)
@@ -313,6 +311,7 @@ export async function getPosts(offset:number,userId:number|null,type:0|1|2|null)
             const postArray = await sql`
             SELECT * FROM posts
             WHERE id = ANY(${ids})
+            ORDER BY created_at DESC
             LIMIT 10 OFFSET ${offset}
             `
             return postArray as unknown as PostType[];
@@ -334,6 +333,7 @@ export async function getPosts(offset:number,userId:number|null,type:0|1|2|null)
             const postArray = await sql`
             SELECT * FROM posts
             WHERE id = ANY(${ids})
+            ORDER BY created_at DESC
             LIMIT 10 OFFSET ${offset}
             `
             return postArray as unknown as PostType[];
@@ -361,6 +361,7 @@ export async function searchPosts(offset:number,query:string){
         const postArray:PostType[] = await sql`
         SELECT * FROM posts
         WHERE title ILIKE ${keyword} OR text ILIKE ${keyword}
+        ORDER BY created_at DESC
         LIMIT 10 OFFSET ${offset}
         `
         return postArray;

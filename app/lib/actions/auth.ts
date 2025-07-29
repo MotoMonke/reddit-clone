@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { signToken } from '../jwt';
 import { getUserByEmail,createUser } from '../db';
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 const FormSchema = z.object({
     email:z.email(),
     username:z.string(),
@@ -47,4 +48,12 @@ export async function signup(prevState:FormState,formData:FormData):Promise<Form
         return {error:response};
     }
     return {success:true};
+}
+export async function logout(){
+    try {
+        const cookieStore = await cookies();
+        cookieStore.delete('token');
+    } catch (error) {
+        console.log(error);
+    }
 }

@@ -11,7 +11,7 @@ export default function Page(){
     const [passwordValue,setPasswordValue] = useState("");
     useEffect(()=>{
         if(state.success){
-           router.push("/");
+           router.push("/login");
         }
     },[state])
     function handleClick(){
