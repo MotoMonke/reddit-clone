@@ -2,7 +2,7 @@
 import { useState,useEffect } from 'react';
 import { getPostVotesAmount,checkPostVote,votePost,voteComment,getCommentVotesAmount,checkCommentVote } from '@/app/lib/db';
 import { verifyToken } from '@/app/lib/jwt';
-import { redirect } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 interface VotesInterface {
   id: number;
@@ -10,6 +10,7 @@ interface VotesInterface {
 }
 
 export default function Votes({ id,isPost }:VotesInterface) {
+    const router = useRouter();
     const [likesAmount,setLikesAmount] = useState(0);
     const [dislikesAmount,setDislikesAmount] = useState(0);
     const [userId,setUserId] = useState<null|number>(null);
@@ -72,7 +73,7 @@ export default function Votes({ id,isPost }:VotesInterface) {
             }
             await functions.vote(value,userId,id);
         }else{
-            redirect('/login');
+            router.push('/login');
         }
 
     }

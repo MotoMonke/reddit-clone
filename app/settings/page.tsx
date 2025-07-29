@@ -2,10 +2,11 @@
 import { verifyToken } from "../lib/jwt";
 import { getUserById } from "../lib/db";
 import { useState,useEffect,useActionState } from "react"
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { editProfile } from "../lib/actions/editProfile";
 import Image from "next/image";
 export default function Page(){
+    const router = useRouter();
     const [userId,setUserId] = useState<null|number>(null);
     const [username,setUsername] = useState('');
     const [email,setEmail] = useState('');
@@ -17,7 +18,7 @@ export default function Page(){
             setLoading(true);
             const result = await verifyToken();
             if(result===null){
-                redirect('/login');
+                router.push('/login');
             }else{
                 setUserId(result);
                 const user = await getUserById(result);

@@ -5,8 +5,9 @@ import { useState,useEffect } from "react";
 import ProfileIcon from "./icons/profileIcon";
 import NotificationsIcon from "./icons/notificationIcon";
 import { verifyToken } from "@/app/lib/jwt";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 export default function NotificationsAndProfile(){
+    const router = useRouter();
     const [isLoggedIn,setIsLoggedIn] = useState(false);
     const [userId,setUserId] = useState<null|number>(null);
     useEffect(()=>{
@@ -22,7 +23,7 @@ export default function NotificationsAndProfile(){
         checkLogin();
     });
     function handleClick(){
-        redirect('/login');
+        router.push('/login');
     }
     return(
         <div>

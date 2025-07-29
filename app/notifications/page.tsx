@@ -3,9 +3,10 @@ import { useState,useEffect } from "react";
 import type { Notification } from "../lib/types";
 import { getNotifications,deleteNotifications } from "../lib/db";
 import { verifyToken } from "../lib/jwt";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 export default function Page(){
+    const router = useRouter();
     const [notifications,setNotifications] = useState<Notification[]>([]);
     const [error,setError] = useState('');
     const [id,setId] = useState<null|number>(null);
@@ -13,10 +14,10 @@ export default function Page(){
         async function onMount(){
             const userId = await verifyToken();
             if(userId===null){
-                redirect('/login');
+                router.push('/login');
             }
             setId(userId);
-            const result = await getNotifications(userId);
+            const result = await getNotifications(userId!);
             if(typeof result === 'string'){
                 setError(result);
             }else{

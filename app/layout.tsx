@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Head from "next/head";
 import "./ui/global.css"
-import Image from "next/image";
 import Logo from "./ui/components/header/icons/logo";
 import CreatePostIcon from "./ui/components/header/icons/createPostIcon";
 import SearchIcon from "./ui/components/header/icons/searchIcon";

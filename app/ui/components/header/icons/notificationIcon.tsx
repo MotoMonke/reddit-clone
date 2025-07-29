@@ -1,12 +1,13 @@
 'use client';
 import Image from "next/image";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState,useEffect } from "react";
 import { getNotificationsCount,markNotificationsAsRead } from "@/app/lib/db";
 interface NotificationsInterface{
     userId:number
 }
 export default function NotificationsIcon({userId}:NotificationsInterface){
+    const router = useRouter();
     const [count,setCount] = useState(0);
     useEffect(()=>{
         async function getCount(){
@@ -20,7 +21,7 @@ export default function NotificationsIcon({userId}:NotificationsInterface){
     async function handleClick(){
         setCount(0);
         await markNotificationsAsRead(userId);
-        redirect('/notifications');
+        router.push('/notifications');
     }
     return(
         <div>

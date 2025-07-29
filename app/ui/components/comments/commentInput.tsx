@@ -2,7 +2,7 @@
 import { useState,useEffect } from "react";
 import { createComment } from "@/app/lib/db";
 import { verifyToken } from "@/app/lib/jwt";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import type { Comment } from "@/app/lib/types";
 interface CommentInput{
     postId:number,
@@ -10,6 +10,7 @@ interface CommentInput{
     onCommentCreated:(newComment:Comment)=>void
 }
 export default function CommnetInput({postId,parentId,onCommentCreated}:CommentInput){
+    const router = useRouter();
     const [result,setResult] = useState('');
     const [text,setText] = useState('');
     const [isVerified,setIsVerified] = useState(false);
@@ -41,7 +42,7 @@ export default function CommnetInput({postId,parentId,onCommentCreated}:CommentI
     }
     function handleInputClick(){
         if(!isVerified){
-            redirect('/login');
+            router.push('/login');
         }
     }
     return(

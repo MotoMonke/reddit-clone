@@ -29,6 +29,13 @@ export default function PostList({ initialPostsArray,fetchFn }:PostListInterface
             loadMorePosts();
         }
     }, [inView])
+    if(initialPostsArray.length===0){
+        return(
+            <div>
+                No posts found
+            </div>
+        )
+    }
     return(
         <div>
             {posts.map((post)=>(
