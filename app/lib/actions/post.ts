@@ -1,9 +1,7 @@
 'use server';
 import { z } from "zod";
 import { insertPost } from "../db";
-import { cookies } from 'next/headers';
-import { jwtVerify } from "jose";
-import type { Payload } from "../types";
+import { verifyToken } from "../jwt";
 import { uploadImage } from "../cloudinary";
 const FormSchema = z.object({
   title: z.string(),
@@ -16,7 +14,6 @@ const FormSchema = z.object({
 });
 
 type FormState = { error?: string; success?: boolean };
-
 export async function createPost(
   prevState: FormState,
   formData: FormData
@@ -35,10 +32,10 @@ export async function createPost(
       image: rawImage instanceof File && rawImage.size > 0 ? rawImage : null,
     });
     //geting user id
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token')?.value;
-    const verifyed = await jwtVerify(token!,new TextEncoder().encode(process.env.JWT_SECRET));
-    const payload = verifyed.payload as Payload;
+    const userId = await verifyToken();
+    if(userId===null){
+      return { error: "Not logged in" };
+    }
     //
     let imageUrl;
     console.log(parsed.image);
@@ -57,18 +54,16 @@ export async function createPost(
       }
       imageUrl=cloudinaryAnswer.secure_url;
     }
-    const answer = await insertPost(payload.userId,parsed.title,parsed.text,imageUrl);
+    const answer = await insertPost(userId,parsed.title,parsed.text,imageUrl);
     if(answer!=='succes'){
       return {error:answer};
     }
     return { success: true };
   } catch (err) {
     if (err instanceof z.ZodError) {
-      console.log(`error ${err.message}`)
       return { error: err.message };
     }
-    console.log(err);
-    return { error: "Something went wrong." };
+    return { error: `Something went wrong: ${err}` };
   }
 }
 

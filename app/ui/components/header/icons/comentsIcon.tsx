@@ -3,10 +3,10 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useState,useEffect } from "react";
 import { getAmountOfComments } from "@/app/lib/db";
-type idType ={
+interface ComentsIconInterface{
     id:number
 }
-export default function ComentsIcon({id}:idType){
+export default function ComentsIcon({id}:ComentsIconInterface){
     const router = useRouter();
     const [commentsCount,setCommentsCount] = useState(0);
     useEffect(()=>{
@@ -18,7 +18,7 @@ export default function ComentsIcon({id}:idType){
     },[])
     return(
         <div>
-            <Image src="/comments.svg" width={20} height={20} alt="Comments icon" className="hover:cursor-pointer" onClick={()=>router.push(`/posts/${id}`)}/>
+            <Image src="/comments.svg" width={20} height={20} alt="Comments icon" className="hover:cursor-pointer" onClick={()=>router.push(`/post/${id}`)}/>
             <div className="text-white">{commentsCount}</div>
         </div>
     )

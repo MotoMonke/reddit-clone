@@ -28,7 +28,6 @@ export async function verifyTokenForMiddleware(token: string) {
     //if(userCheck===null){
     //  throw new Error('no user with such id in database');
     //}
-    console.log(payload);
     return payload;
   } catch (error) {
     console.error('Token verification failed:', error);
@@ -48,7 +47,6 @@ export async function verifyToken() {
     if(userCheck===null){
       throw new Error('no user with such id in database');
     }
-    console.log(payload);
     return id;
   } catch (error) {
     console.error('Token verification failed:', error);

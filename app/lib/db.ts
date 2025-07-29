@@ -61,7 +61,7 @@ export async function createUser(email:string,username:string,password:string){
         return "succes";
     } catch (error) {
         console.log(error);
-        return "internal server error";
+        return `error message ${error}`;
     }
 }
 //posts
@@ -151,7 +151,6 @@ export async function getAmountOfComments(postId:number){
         WHERE post_id = ${postId}
         `
         const count = Number(result[0].count??0);
-        console.log(count);
         return count;
     } catch (error) {
         console.log(error);
@@ -187,29 +186,37 @@ export async function votePost(vote:boolean,userId:number,postId:number){
     }
 }
 export async function getPostVotesAmount(postId:number){
-    const result1 = await sql`
-    SELECT COUNT(*) FROM post_votes
-    WHERE post_id = ${postId} AND vote = true
-    `
-    const result2 = await sql`
-    SELECT COUNT(*) FROM post_votes
-    WHERE post_id = ${postId} AND vote = false
-    `
-    const upVotes = Number(result1[0].count??0);
-    const downVotes = Number(result2[0].count??0);
-    return {upVotes,downVotes};
+    try {
+        const result1 = await sql`
+        SELECT COUNT(*) FROM post_votes
+        WHERE post_id = ${postId} AND vote = true
+        `
+        const result2 = await sql`
+        SELECT COUNT(*) FROM post_votes
+        WHERE post_id = ${postId} AND vote = false
+        `
+        const upVotes = Number(result1[0].count??0);
+        const downVotes = Number(result2[0].count??0);
+        return {upVotes,downVotes};
+    } catch (error) {
+        console.log(error);
+    }
 }
 export async function checkPostVote(postId:number,userId:number){
-    //return true false or null
+    //returns true false or null
     //true means upvote, false means downvote, null means no vote
-    const result = await sql`
-    SELECT * FROM post_votes
-    WHERE post_id=${postId} AND user_id=${userId}
-    `
-    if(result.length===0){
-        return null;
-    }else{
-        return result[0].vote;
+    try {
+        const result = await sql`
+        SELECT * FROM post_votes
+        WHERE post_id=${postId} AND user_id=${userId}
+        `
+        if(result.length===0){
+            return null;
+        }else{
+            return result[0].vote;
+        }
+    } catch (error) {
+        console.log(error);
     }
 }
 //coments
@@ -241,29 +248,37 @@ export async function voteComment(vote:boolean,userId:number,commentId:number){
     }
 }
 export async function getCommentVotesAmount(commentId:number){
-    const result1 = await sql`
-    SELECT COUNT(*) FROM comment_votes
-    WHERE comment_id = ${commentId} AND vote = true
-    `
-    const result2 = await sql`
-    SELECT COUNT(*) FROM comment_votes
-    WHERE comment_id = ${commentId} AND vote = false
-    `
-    const upVotes = Number(result1[0].count??0);
-    const downVotes = Number(result2[0].count??0);
-    return {upVotes,downVotes};
+    try {
+        const result1 = await sql`
+        SELECT COUNT(*) FROM comment_votes
+        WHERE comment_id = ${commentId} AND vote = true
+        `
+        const result2 = await sql`
+        SELECT COUNT(*) FROM comment_votes
+        WHERE comment_id = ${commentId} AND vote = false
+        `
+        const upVotes = Number(result1[0].count??0);
+        const downVotes = Number(result2[0].count??0);
+        return {upVotes,downVotes};
+    } catch (error) {
+        console.log(error);
+    }
 }
 export async function checkCommentVote(commentId:number,userId:number){
     //return true false or null
     //true means upvote, false means downvote, null means no vote
-    const result = await sql`
-    SELECT * FROM comment_votes
-    WHERE comment_id=${commentId} AND user_id=${userId}
-    `
-    if(result.length===0){
-        return null;
-    }else{
-        return result[0].vote;
+    try {
+        const result = await sql`
+        SELECT * FROM comment_votes
+        WHERE comment_id=${commentId} AND user_id=${userId}
+        `
+        if(result.length===0){
+            return null;
+        }else{
+            return result[0].vote;
+        }
+    } catch (error) {
+        console.log(error);
     }
 }
 //refactored get posts
@@ -277,7 +292,6 @@ export async function getPosts(offset:number,userId:number|null,type:0|1|2|null)
             const postArray = await sql`
             SELECT * FROM posts ORDER BY created_at DESC LIMIT 10 OFFSET ${offset}
             `
-            console.log(postArray)
             return postArray as unknown as PostType[];
         } catch (error) {
             console.log(error);
@@ -291,7 +305,6 @@ export async function getPosts(offset:number,userId:number|null,type:0|1|2|null)
             ORDER BY created_at DESC
             LIMIT 10 OFFSET ${offset} 
             `
-            console.log(postArray)
             return postArray as unknown as PostType[];
         } catch (error) {
             console.log(error);
@@ -302,9 +315,7 @@ export async function getPosts(offset:number,userId:number|null,type:0|1|2|null)
             const comentedPostsIds = await sql`
             SELECT DISTINCT post_id FROM comments WHERE author_id = ${userId!}
             `
-            console.log(comentedPostsIds);
             const ids =comentedPostsIds.map(row=>row.post_id);
-            console.log("IDS:", ids);
             if(ids.length===0){
                 return [];
             }
@@ -324,9 +335,7 @@ export async function getPosts(offset:number,userId:number|null,type:0|1|2|null)
             const votedPostsIds = await sql`
             SELECT DISTINCT post_id FROM post_votes WHERE user_id = ${userId!}
             `
-            console.log(votedPostsIds);
             const ids = votedPostsIds.map(row=>row.post_id);
-            console.log("IDS:", ids);
             if(ids.length===0){
                 return [];
             }
@@ -346,10 +355,10 @@ export async function getPosts(offset:number,userId:number|null,type:0|1|2|null)
     }
 }
 //i wrote this function to pass it as prop to postList.tsx in postScroll.tsx
-//because postScroll is server component and i can't define functions with it
+//because postScroll is server component and i can't define functions inside of it
 //why define separete function? 'cause postList accepts fetchFn(offset) func that returns PostType[]
 //but getPosts is(offset,userId,type), i think you get it 
-//it's just getPosts with(offset,null,null) arguments
+//this function is just getPosts with(offset,null,null) arguments
 export async function getPostsForGlobalFeed(offset:number){
     const result:PostType[] = await getPosts(offset,null,null);
     return result;
@@ -395,27 +404,23 @@ export async function editUser(userId:number,username:string,email:string,profil
 //creating notifications, they are going to be created when someone comments under user post(first tree level comment) or someone answers to user comment
 async function createNotification(post_id:number,author_id:number,comment_id:number|null) {
     //comment_id stands for id of coment that users replies to, if it's null notification will be sent to post author, else to comment author
-    const answer = await sql`
+    try {
+        const answer = await sql`
         SELECT author_id FROM posts WHERE id = ${post_id}
-    `
-    const post_author_id = answer[0].author_id as number;
-    if(comment_id===null){
-        if(post_author_id===author_id){
-            return;
-        }
-        try {
+        `
+        const post_author_id = answer[0].author_id as number;
+        if(comment_id===null){
+            if(post_author_id===author_id){
+                return;
+            }
             await sql`
                 INSERT INTO notifications (post_id,author_id,receiver_id)
                 VALUES (${post_id},${author_id},${post_author_id})
             `
-        } catch (error) {
-            console.log(error);
-        }
-    }else{
-        //it seems like this function don't need comment id, but:
-        //if comment is an answer to another comment then using comment id function will find
-        //author of comment id and set receiver id to it
-        try {
+        }else{
+            //it seems like this function don't need comment id, but:
+            //if comment is an answer to another comment then using comment id function will find
+            //author of comment id and set receiver id to it
             const answer = await sql`
             SELECT * FROM comments WHERE id = ${comment_id}
             `
@@ -430,9 +435,9 @@ async function createNotification(post_id:number,author_id:number,comment_id:num
                 INSERT INTO notifications (post_id,author_id,receiver_id,comment_id)
                 VALUES (${post_id},${author_id},${comment.author_id},${comment_id})
             `
-        } catch (error) {
-            console.log(error);
         }
+    } catch (error) {
+        console.log(error);
     }
 }
 export async function getNotifications(userId:number){

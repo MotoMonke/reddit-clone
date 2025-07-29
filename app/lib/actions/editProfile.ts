@@ -1,5 +1,5 @@
 'use server';
-import z, { success } from "zod";
+import z from "zod";
 import { verifyToken } from "../jwt";
 import { uploadImage } from "../cloudinary";
 import { editUser } from "../db";
@@ -30,7 +30,6 @@ export async function editProfile(prevState: FormState,formData: FormData):Promi
         }
         //saving img to cloud
         let imageUrl;
-        console.log(parsed.image);
         if(parsed.image === null){
             imageUrl=null;
         }else{
@@ -38,7 +37,6 @@ export async function editProfile(prevState: FormState,formData: FormData):Promi
             const buffer = Buffer.from(await parsed.image!.arrayBuffer());
             const base64 = buffer.toString("base64");
             const base64WithPrefix = `data:${parsed.image!.type};base64,${base64}`;
-            console.log(base64WithPrefix);
             //
             const cloudinaryAnswer = await uploadImage(base64WithPrefix);
             if(typeof cloudinaryAnswer === "string"){
@@ -52,7 +50,9 @@ export async function editProfile(prevState: FormState,formData: FormData):Promi
         }
         return {success:true};
     } catch (err) {
-        console.log(err);
+        if (err instanceof z.ZodError) {
+            return { error: err.message };
+        }
         return {error:`${err}`};
     }
 }

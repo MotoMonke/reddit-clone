@@ -6,6 +6,7 @@ cloudinary.config({
     api_secret:process.env.CLOUDINARY_API_SECRET,
     secure:true,
 });
+//accepts base64 image
 export async function uploadImage(image:string){
     try {
         const results = await cloudinary.uploader.upload(image);

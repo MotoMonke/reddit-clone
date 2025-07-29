@@ -1,8 +1,8 @@
-import { PostsScroll } from "./ui/components/postScroll/postScroll";
+import { GlobalFeed } from "./ui/components/postScroll/globalFeed";
 export default async function Home() {
   return (
     <>
-      <PostsScroll/>
+      <GlobalFeed/>
     </>
   );
 }

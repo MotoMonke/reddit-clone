@@ -39,7 +39,7 @@ export default function PostList({ initialPostsArray,fetchFn }:PostListInterface
     return(
         <div>
             {posts.map((post)=>(
-                <PostCard key={post.id} {...post}/>
+                <PostCard key={post.id} post={post}/>
             ))}
             {hasMore&&<div ref={ref}>
                 Loading...

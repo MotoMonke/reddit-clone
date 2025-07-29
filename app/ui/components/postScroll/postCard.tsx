@@ -4,7 +4,10 @@ import Image from "next/image"
 import ComentsIcon from "../header/icons/comentsIcon"
 import Votes from "../votes/votes"
 import UserLink from "../user/userLink"
-export default function PostCard({...post}: PostType){
+interface PostCardInterface{
+    post:PostType
+}
+export default function PostCard({post}: PostCardInterface){
     console.log(post.image_url)
     return (
         <div className="flex flex-col mb-10">

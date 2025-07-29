@@ -28,7 +28,6 @@ export default function Page(){
     },[]);
     async function clearAll(){
         setNotifications([]);
-        console.log(id);
         await deleteNotifications(id!);
     }
     if(error.length>0){
