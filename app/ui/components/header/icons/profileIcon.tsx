@@ -14,7 +14,7 @@ export default function ProfileIcon({userId}:ProfileIconInterface){
         router.push('/');
     }
     return(
-        <div>
+        <div className="flex align-middle">
             <Image src="/default_profile.svg" width={25} height={25} alt="Profile picture" className="hover:cursor-pointer" onClick={()=>setOpen(prev=>!prev)}/>
             {open && (
                 <div className="fixed right-0 mt-2 w-48 bg-white text-black rounded shadow-lg z-50">

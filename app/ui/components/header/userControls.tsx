@@ -2,11 +2,12 @@
 //else it will render login button which will redirect user to login page
 'use client'
 import { useState,useEffect } from "react";
+import CreatePostIcon from "./icons/createPostIcon";
 import ProfileIcon from "./icons/profileIcon";
 import NotificationsIcon from "./icons/notificationIcon";
 import { verifyToken } from "@/app/lib/jwt";
 import { useRouter } from "next/navigation";
-export default function NotificationsAndProfile(){
+export default function UserControls(){
     const router = useRouter();
     const [isLoggedIn,setIsLoggedIn] = useState(false);
     const [userId,setUserId] = useState<null|number>(null);
@@ -26,12 +27,13 @@ export default function NotificationsAndProfile(){
         router.push('/login');
     }
     return(
-        <div>
+        <div className="align-middle w-40">
             {isLoggedIn&&
-            <div>
+            <div className="flex flex-row justify-between align-middle w-full h-full">
                 {/*if userId is null that means isLoggedIn is false so this elements will not render, so it's safe to pass userId(null|number) here */}
-                <ProfileIcon userId={userId!}/>
-                <NotificationsIcon userId={userId!}/>     
+                <CreatePostIcon/>
+                <NotificationsIcon userId={userId!}/> 
+                <ProfileIcon userId={userId!}/>    
             </div>}
             {!isLoggedIn&&<div className="hover:cursor-pointer" onClick={handleClick}>Login</div>}
         </div>

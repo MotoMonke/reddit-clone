@@ -24,9 +24,9 @@ export default function NotificationsIcon({userId}:NotificationsInterface){
         router.push('/notifications');
     }
     return(
-        <div>
+        <div className="relative flex align-middle">
             <Image src="/notifications.svg" width={25} height={25} alt="Notifications icon" className="hover:cursor-pointer" onClick={handleClick}/>
-            <div className="text-red-600">{count<=9?count:'9+'}</div>
+            <div className="absolute top-5 left-5 text-red-600">{count<=9?count:'9+'}</div>
         </div>
     )
 }
