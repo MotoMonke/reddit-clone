@@ -46,10 +46,31 @@ export default function CommnetInput({postId,parentId,onCommentCreated}:CommentI
         }
     }
     return(
-        <div >
-            <input type="text" placeholder="Join the conversation" value={text} onChange={e=>setText(e.target.value)} onClick={handleInputClick} />
-            <button onClick={submitComment}>Comment</button>
-            {result.length>0&&<div>{result}</div>}
+        <div className="mb-4 max-w-[400px]">
+            <div className="">
+                <textarea
+                    className="w-full max-w-[400px] p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="What are your thoughts?"
+                    value={text}
+                    onChange={e=>setText(e.target.value)}
+                    onClick={handleInputClick}
+                    rows={3}
+                />
+            </div>
+            
+            <div className="flex justify-between items-center mt-2">
+                <div className="text-xs text-gray-500">
+                    {result}
+                </div>
+                
+                <button 
+                    onClick={submitComment}
+                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-medium disabled:opacity-50"
+                    disabled={!isVerified || text.length === 0}
+                >
+                    Comment
+                </button>
+            </div>
         </div>
     )    
 }

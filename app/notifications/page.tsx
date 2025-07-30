@@ -5,6 +5,7 @@ import { getNotifications,deleteNotifications } from "../lib/db";
 import { verifyToken } from "../lib/jwt";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import UserLink from "../ui/components/user/userLink";
 export default function Page(){
     const router = useRouter();
     const [notifications,setNotifications] = useState<Notification[]>([]);
@@ -37,7 +38,7 @@ export default function Page(){
     }
     return (
         <div >
-            <button className="hover:cursor-pointer" onClick={clearAll}>Clear all</button>
+            <button className="hover:cursor-pointer active:bg-red-500 m-5 bg-red-700 p-2 rounded-full" onClick={clearAll}>Clear all</button>
             {notifications.map(notification=>(
                 <NotificationCard notification={notification}/>
             ))}
@@ -49,19 +50,19 @@ interface CardInterface{
 }
 function NotificationCard({notification}:CardInterface){
     return(
-        <div>
+        <div className="p-5">
             {notification.comment_id===null&&<div>
-                <div>
-                    <Link className="hover:underline" href={`/user/${notification.author_id}`}>User {notification.author_id}</Link>
-                    commented under your post
-                    <Link className="hover:underline" href={`/post/${notification.post_id}`}>{notification.post_id}</Link>    
+                <div className="flex gap-2">
+                    <UserLink userId={notification.author_id}/>
+                    <p>commented under your post:</p>
+                    <Link className="hover:underline text-blue-500" href={`/post/${notification.post_id}`}>link</Link>    
                 </div>    
             </div>}
             {notification.comment_id!==null&&<div>
-                <div>
-                    <Link className="hover:underline" href={`/user/${notification.author_id}`}>User {notification.author_id}</Link>
-                    answered your comment under post
-                    <Link className="hover:underline" href={`/post/${notification.post_id}`}>{notification.post_id}</Link> 
+                <div className="flex gap-2">
+                    <UserLink userId={notification.author_id}/>
+                    <p>answered your comment under post:</p>
+                    <Link className="hover:underline text-blue-500" href={`/post/${notification.post_id}`}>link</Link>
                 </div>    
             </div>}
         </div>

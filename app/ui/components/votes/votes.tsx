@@ -19,9 +19,14 @@ export default function Votes({ id,isPost }:VotesInterface) {
     const functions = isPost?{getAmount:getPostVotesAmount,checkVote:checkPostVote,vote:votePost}:{getAmount:getCommentVotesAmount,checkVote:checkCommentVote,vote:voteComment};
     useEffect(()=>{
         async function getVotes(){
-            const { upVotes, downVotes } = await functions.getAmount(id);
-            setLikesAmount(upVotes);
-            setDislikesAmount(downVotes);
+            const result = await functions.getAmount(id);
+            if(result===undefined){
+                setLikesAmount(0);
+                setDislikesAmount(0);  
+            }else{
+                setLikesAmount(result.upVotes);
+                setDislikesAmount(result.downVotes);
+            }
         }
         async function checkUser(){
             //returns userId or null if not logged in
@@ -78,15 +83,16 @@ export default function Votes({ id,isPost }:VotesInterface) {
 
     }
   return (
-    <div>
-        <div>
-            {(voted===null||voted===false)&&<Image src="/like.svg" width={10} height={10} alt="like icon" className='hover:cursor-pointer' onClick={()=>vote(true)}/>}
-            {(voted===true)&&<div><Image src="/like.svg" width={10} height={10} alt="like icon" className='hover:cursor-pointer' onClick={()=>vote(true)}/>*</div>}
+    <div className='flex flex-row bg-[#2A3236] pt-1 pb-1 rounded-full justify-center gap-2 min-w-25'>
+        <div className="flex flex-row gap-1.5 ml-3">
+            {(voted===null||voted===false)&&<Image src="/like.svg" width={20} height={20} alt="like icon" className='hover:cursor-pointer' onClick={()=>vote(true)}/>}
+            {(voted===true)&&<Image src="/like-active.svg" width={15} height={15} alt="like icon" className='hover:cursor-pointer' onClick={()=>vote(true)}/>}
             <div>{likesAmount}</div>
         </div>
-        <div>
-            {(voted===null||voted===true)&&<Image src="/dislike.svg" width={10} height={10} alt="dislike icon" className='hover:cursor-pointer' onClick={()=>vote(false)}/>}
-            {(voted===false)&&<div><Image src="/dislike.svg" width={10} height={10} alt="dislike icon" className='hover:cursor-pointer' onClick={()=>vote(false)}/>*</div>}
+        <div className='bg-white w-0.5 h-full'></div>
+        <div className="flex flex-row gap-1.5 mr-3">
+            {(voted===null||voted===true)&&<Image src="/dislike.svg" width={20} height={20} alt="dislike icon" className='hover:cursor-pointer' onClick={()=>vote(false)}/>}
+            {(voted===false)&&<Image src="/dislike-active.svg" width={15} height={15} alt="dislike icon" className='hover:cursor-pointer' onClick={()=>vote(false)}/>}
             <div>{dislikesAmount}</div>
         </div>
     </div>

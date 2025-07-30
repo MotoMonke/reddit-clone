@@ -17,9 +17,9 @@ export default function ComentsIcon({id}:ComentsIconInterface){
         getCount();
     },[])
     return(
-        <div>
-            <Image src="/comments.svg" width={20} height={20} alt="Comments icon" className="hover:cursor-pointer" onClick={()=>router.push(`/post/${id}`)}/>
-            <div className="text-white">{commentsCount}</div>
+        <div className="flex flex-row bg-[#2A3236] pt-1 pb-1 justify-center rounded-full min-w-12">
+            <Image src="/comments.svg" width={25} height={25} alt="Comments icon" className="hover:cursor-pointer ml-2" onClick={()=>router.push(`/post/${id}`)}/>
+            <div className="text-white mr-3">{commentsCount}</div>
         </div>
     )
 }

@@ -37,7 +37,8 @@ export default function PostList({ initialPostsArray,fetchFn }:PostListInterface
         )
     }
     return(
-        <div>
+       <div className="flex justify-center w-full">
+         <div className="flex flex-col ml-10 mr-10">
             {posts.map((post)=>(
                 <PostCard key={post.id} post={post}/>
             ))}
@@ -45,5 +46,6 @@ export default function PostList({ initialPostsArray,fetchFn }:PostListInterface
                 Loading...
             </div>}
         </div>
+       </div>
     )
 }

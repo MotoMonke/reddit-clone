@@ -39,12 +39,13 @@ export default function Page(){
                 {passwordIsVisible&&<VisiblePassword changeState={handleClick} changePassword={changePasswordValue} password={passwordValue}/>}
                 {!passwordIsVisible&&<NotVisiblePassword changeState={handleClick} changePassword={changePasswordValue} password={passwordValue}/>}
                 <button
+                    type="submit"
                     className="mt-3 mb-5 border border-gray-400 pl-4 pr-4 pt-2 pb-2 rounded-full active:bg-gray-400 hover:cursor-pointer"
                 >Submit</button>
                 {state.error && <p className="text-red-500">{state.error}</p>}
             </form>
             <form action={lazyFormAction}>
-                <button type="submit">Login as guest</button>
+                <button type="submit" className="mt-3 hover:underline">Login as guest</button>
                 {lazyState.error && <p className="text-red-500">{lazyState.error}</p>}
             </form>
             <p className="mt-5">

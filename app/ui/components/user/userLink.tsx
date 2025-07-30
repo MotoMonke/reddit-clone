@@ -22,8 +22,8 @@ export default function UserLink({userId}:UserLinkInterface){
         getUser();
     },[])
     return(
-        <div>
-            <Image src={imageUrl} width={20} height={20} alt="user profile image"/>
+        <div className="flex flex-row gap-2">
+            <Image src={imageUrl} width={25} height={25} alt="user profile image" className="rounded-full"/>
             <Link href={`/user/${userId}`}>
                 <span className="hover:underline">{username}</span>
             </Link>

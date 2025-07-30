@@ -27,7 +27,7 @@ export default function UserControls(){
         router.push('/login');
     }
     return(
-        <div className="align-middle w-40">
+        <div className="w-40">
             {isLoggedIn&&
             <div className="flex flex-row justify-between align-middle w-full h-full">
                 {/*if userId is null that means isLoggedIn is false so this elements will not render, so it's safe to pass userId(null|number) here */}
@@ -35,7 +35,7 @@ export default function UserControls(){
                 <NotificationsIcon userId={userId!}/> 
                 <ProfileIcon userId={userId!}/>    
             </div>}
-            {!isLoggedIn&&<div className="hover:cursor-pointer" onClick={handleClick}>Login</div>}
+            {!isLoggedIn&&<div className="bg-red-700 w-20 rounded-full hover:cursor-pointer active:bg-red-600 pl-5 ml-8 h-full" onClick={handleClick}>Login</div>}
         </div>
     )
 }
