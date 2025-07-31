@@ -49,7 +49,7 @@ export default function Page(){
                 {lazyState.error && <p className="text-red-500">{lazyState.error}</p>}
             </form>
             <p className="mt-5">
-                Don&#39t have an account? 
+                Don&#39;t have an account? 
                 <Link href="/signup" className="text-blue-500 active:text-blue-300"> Signup</Link>
             </p>
         </div>
