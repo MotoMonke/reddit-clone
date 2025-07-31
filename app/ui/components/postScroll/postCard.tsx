@@ -1,14 +1,13 @@
 'use client'
 import type { PostType } from "@/app/lib/types"
 import Image from "next/image"
-import ComentsIcon from "../header/icons/comentsIcon"
+import ComentsIcon from "../icons/comentsIcon"
 import Votes from "../votes/votes"
 import UserLink from "../user/userLink"
 interface PostCardInterface{
     post:PostType
 }
 export default function PostCard({post}: PostCardInterface){
-    console.log(post.image_url)
     return (
         <div className="flex flex-col pt-8 max-w-[800px] pb-3 hover:bg-[#222222] border-b-1 border-b-gray-600">
             <UserLink userId={post.author_id}/>

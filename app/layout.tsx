@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Head from "next/head";
 import "./ui/global.css"
-import Logo from "./ui/components/header/icons/logo";
-import CreatePostIcon from "./ui/components/header/icons/createPostIcon";
-import SearchIcon from "./ui/components/header/icons/searchIcon";
+import Logo from "./ui/components/header/headerIcons/logo";
+import CreatePostIcon from "./ui/components/header/headerIcons/createPostIcon";
+import SearchIcon from "./ui/components/header/headerIcons/searchIcon";
 import UserControls from "./ui/components/header/userControls";
 
 export const metadata: Metadata = {

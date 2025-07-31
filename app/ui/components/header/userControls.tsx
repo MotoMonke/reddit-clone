@@ -2,9 +2,9 @@
 //else it will render login button which will redirect user to login page
 'use client'
 import { useState,useEffect } from "react";
-import CreatePostIcon from "./icons/createPostIcon";
-import ProfileIcon from "./icons/profileIcon";
-import NotificationsIcon from "./icons/notificationIcon";
+import CreatePostIcon from "./headerIcons/createPostIcon";
+import ProfileIcon from "./headerIcons/profileIcon";
+import NotificationsIcon from "./headerIcons/notificationIcon";
 import { verifyToken } from "@/app/lib/jwt";
 import { useRouter } from "next/navigation";
 export default function UserControls(){
