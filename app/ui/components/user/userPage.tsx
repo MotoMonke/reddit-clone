@@ -38,7 +38,7 @@ export default function UserPage({userId}:UserPageInterface){
             setLoading(false)
         }
         populateState();
-    },[]);
+    },[userId]);
     if(loading){
         return <div>Loading...</div>
     }

@@ -37,7 +37,7 @@ export default function Votes({ id,isPost }:VotesInterface) {
         }
         getVotes();
         checkUser();
-    },[]);
+    },[functions,id]);
     useEffect(()=>{
         if(userId!==null){
             async function checkIfVoted(){
@@ -47,7 +47,7 @@ export default function Votes({ id,isPost }:VotesInterface) {
             }
             checkIfVoted();
         }
-    },[userId])
+    },[userId,functions,id])
     async function vote(value:boolean){
         if(userId!==null){
             if(voted===null){

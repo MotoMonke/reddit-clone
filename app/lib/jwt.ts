@@ -23,7 +23,7 @@ export async function signToken(payload: JwtPayload) {
 export async function verifyTokenForMiddleware(token: string) {
   try {
     const { payload } = await jwtVerify(token, secret);
-    const id = payload.userId as number;
+    //const id = payload.userId as number;
     //const userCheck = await getUserById(id);
     //if(userCheck===null){
     //  throw new Error('no user with such id in database');

@@ -7,7 +7,6 @@ import { editProfile } from "../lib/actions/editProfile";
 import Image from "next/image";
 export default function Page(){
     const router = useRouter();
-    const [userId,setUserId] = useState<null|number>(null);
     const [username,setUsername] = useState('');
     const [email,setEmail] = useState('');
     const [imageUrl,setImageUrl] = useState<null|string>('');
@@ -20,7 +19,6 @@ export default function Page(){
             if(result===null){
                 router.push('/login');
             }else{
-                setUserId(result);
                 const user = await getUserById(result);
                 setUsername(user!.username);
                 setEmail(user!.email);
@@ -29,7 +27,7 @@ export default function Page(){
             }
         }
         checkAuth();
-    },[edit]);
+    },[edit,router]);
     function changeEditState(){
         setEdit(prev=>!prev);
     }
@@ -64,13 +62,16 @@ function EditForm({imageUrl,username,email,changeEditState}:EditFormInterface){
     const [file,setFile] = useState<string>(imageUrl===null?'/default_profile.svg':imageUrl);
     const [inputUsername,setInputUsername] = useState(username);
     const [inputEmail,setInputEmail] = useState(email);
-    function handleChange(e:any){
-        setFile(URL.createObjectURL(e.target.files[0]));
+    function handleChange(e:React.ChangeEvent<HTMLInputElement>){
+        const file = e.target.files?.[0];
+        if (file) {
+            setFile(URL.createObjectURL(file));
+        }
     }
     return(
         <div className="flex flex-col">
             <form className="flex flex-col gap-3 mb-3" action={formAction}>
-                {file && <img src={file} className="rounded-4xl" alt="Uploaded preview" width={500} height={500} />}  
+                {file && <Image src={file} className="rounded-4xl" alt="Uploaded preview" width={500} height={500} unoptimized/>}  
                 <input id="file" type="file" name="image" accept="image/*" onChange={handleChange} 
                     className="mb-3 file:border-gray-400 file:border-1 file:rounded-2xl file:p-2 file:active:bg-gray-400"
                 />

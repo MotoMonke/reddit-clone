@@ -14,7 +14,7 @@ const FormSchema = z.object({
 });
 
 type FormState = { error?: string; success?: boolean };
-export async function editProfile(prevState: FormState,formData: FormData):Promise<FormState>{
+export async function editProfile(_prevState: FormState,formData: FormData):Promise<FormState>{
     const rawImage = formData.get("image");
     const rawUsername = formData.get("username");
     const rawEmail = formData.get("email");

@@ -52,7 +52,7 @@ export async function createUser(email:string,username:string,password:string){
     }
     try {
         const hashedPassword = await bcrypt.hash(password,10);
-        const newUser = await sql`
+        await sql`
         INSERT INTO users (email,username,password)
         VALUES (${email},${username},${hashedPassword});
         `
@@ -89,10 +89,13 @@ export async function getPosts(offset:number,limit:number){
     }
 }
 */
+type CommentNode = Comment & {
+  children: CommentNode[];
+};
 
 function buildTree(flatList:Comment[]){
-    const idMap:any = {};
-    const tree:any = [];
+    const idMap: Record<number, CommentNode> = {};
+  const tree: CommentNode[] = [];
     flatList.forEach(comment => {
         idMap[comment.id] = {...comment,children: []}
     });

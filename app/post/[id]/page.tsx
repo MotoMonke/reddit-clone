@@ -12,8 +12,10 @@ export default async function PostPage({ params }: { params: Promise<{ id: numbe
   const post: PostType = result.post;
   const comments: Comment[] = result.tree;
   return (
-    <div className="ml-5 mr-5">
-      <PostCard post={post} />
+    <div className="ml-5 mr-5 ">
+      <div className="flex flex-col items-center">
+        <PostCard post={post} />
+      </div>
       <CommentsTree comments={comments} postId={id}/>
     </div>
   );

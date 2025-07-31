@@ -20,8 +20,10 @@ export default function CommentsTree({comments,postId}:CommentsTreeProps){
     }
     return(
         <div className="rounded-md shadow">
-            <div className="p-4 border-b">
-                <CommnetInput postId={postId} parentId={null} onCommentCreated={onCommentCreated}/>
+            <div className="flex justify-center border-b">
+                <div className="p-4 w-full max-w-[800px]">
+                    <CommnetInput postId={postId} parentId={null} onCommentCreated={onCommentCreated} />
+                </div>
             </div>
             <div className="divide-y divide-gray-200">
                 {commentArray.map((comment)=>(
@@ -64,7 +66,7 @@ function OneComment({comment,postId}:OneCommentProps){
                                 <Votes isPost={false} id={comment.id} />
                             </div>
                             
-                            <div className="mt-3">
+                            <div className="mt-3 max-w-[400px]">
                                 <CommnetInput 
                                     postId={postId} 
                                     parentId={comment.id} 

@@ -10,7 +10,7 @@ const FormSchema = z.object({
 })
 const LoginSchema = FormSchema.omit({username:true});
 type FormState = { error?: string; success?: boolean };
-export async function login(prevState:FormState,formData:FormData):Promise<FormState>{
+export async function login(_prevState:FormState,formData:FormData):Promise<FormState>{
     const rawEmail = formData.get('email');
     const rawPassword = formData.get('password');
     try {
@@ -42,7 +42,7 @@ export async function login(prevState:FormState,formData:FormData):Promise<FormS
     }
 } 
 //logins user without email and password aka guest mode
-export async function lazyLogin(prevState:FormState,formData:FormData):Promise<FormState>{
+export async function lazyLogin(_prevState:FormState,_formData:FormData):Promise<FormState>{
     try {
         const userId = 2;
         const userEmail = 'guest@email.com';
@@ -65,7 +65,7 @@ export async function lazyLogin(prevState:FormState,formData:FormData):Promise<F
         return {error:`${err}`}
     }
 }
-export async function signup(prevState:FormState,formData:FormData):Promise<FormState>{
+export async function signup(_prevState:FormState,formData:FormData):Promise<FormState>{
     const rawEmail = formData.get('email');
     const rawUsername = formData.get('username');
     const rawPassword = formData.get('password');

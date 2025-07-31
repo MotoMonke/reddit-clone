@@ -13,7 +13,7 @@ export default function Page(){
         if(state.success){
            router.push("/login");
         }
-    },[state])
+    },[state,router])
     function handleClick(){
         setPasswordIsVisible(!passwordIsVisible);
     }

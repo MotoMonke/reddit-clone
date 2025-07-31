@@ -24,7 +24,7 @@ export default function ProfileIcon({userId}:ProfileIconInterface){
             }
         }
         getImageUrl();
-    },[])
+    },[router,userId])
     async function handleClick(){
         await logout();
         router.push('/');

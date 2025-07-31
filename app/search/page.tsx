@@ -17,7 +17,7 @@ export default function Page(){
     },[query])
     return(
         <div>
-            <div>Search results for "{query}"</div>
+            <div>Search results for &#34{query}&#34</div>
             {initialPosts.length>0&&<PostList initialPostsArray={initialPosts} fetchFn={(offset) => searchPosts(offset,query)}/>}
         </div>
     )

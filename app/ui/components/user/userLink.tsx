@@ -20,7 +20,7 @@ export default function UserLink({userId}:UserLinkInterface){
             }
         }
         getUser();
-    },[])
+    },[userId])
     return(
         <div className="flex flex-row gap-2">
             <Image src={imageUrl} width={25} height={25} alt="user profile image" className="rounded-full"/>

@@ -26,7 +26,7 @@ export default function Page(){
             }
         }
         onMount();
-    },[]);
+    },[router]);
     async function clearAll(){
         setNotifications([]);
         await deleteNotifications(id!);
@@ -40,7 +40,7 @@ export default function Page(){
         <div >
             <button className="hover:cursor-pointer active:bg-red-500 m-5 bg-red-700 p-2 rounded-full" onClick={clearAll}>Clear all</button>
             {notifications.map(notification=>(
-                <NotificationCard notification={notification}/>
+                <NotificationCard key={notification.id} notification={notification}/>
             ))}
         </div>
     )

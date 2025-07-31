@@ -46,10 +46,10 @@ export default function CommnetInput({postId,parentId,onCommentCreated}:CommentI
         }
     }
     return(
-        <div className="mb-4 max-w-[400px]">
+        <div className="mb-4">
             <div className="">
                 <textarea
-                    className="w-full max-w-[400px] p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full  p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="What are your thoughts?"
                     value={text}
                     onChange={e=>setText(e.target.value)}

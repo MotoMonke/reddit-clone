@@ -17,7 +17,7 @@ export default function NotificationsIcon({userId}:NotificationsInterface){
             }
         }
         getCount();
-    },[])
+    },[userId])
     async function handleClick(){
         setCount(0);
         await markNotificationsAsRead(userId);
