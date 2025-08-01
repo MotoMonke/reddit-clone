@@ -1,47 +1,21 @@
 'use client'
-import { useState,useEffect } from "react"
+import { useState} from "react"
 import PostList from "../postScroll/postList"
-import { getPosts } from "@/app/lib/db"
+import { getUserPosts,getCommentedPosts,getVotedPosts } from "@/app/lib/db"
 import { PostType } from "@/app/lib/types"
-import { getUserById } from "@/app/lib/db"
 import Image from "next/image"
 interface UserPageInterface{
-    userId:number
+    userId:number,
+    createdPosts:PostType[],
+    commentedPosts:PostType[],
+    votedPosts:PostType[],
+    username:string,
+    imageUrl:string,
 }
-export default function UserPage({userId}:UserPageInterface){
+export default function UserPage({userId,createdPosts,commentedPosts,votedPosts,username,imageUrl}:UserPageInterface){
     // i didn't thought about better way to toggle betwen user posts comments and voted posts
     const [option,setOption] = useState<0|1|2>(0);
     //
-    const [posts,setPosts] = useState<PostType[]>([]);
-    const [comments,setComments] = useState<PostType[]>([]);
-    const [voted,setVoted] = useState<PostType[]>([]);
-    const [loading,setLoading] = useState(true);
-    //user photo and username
-    const [imageUrl,setImageUrl] = useState('/default_profile.svg');
-    const [username,setUsername] = useState('');
-    useEffect(()=>{
-        async function populateState(){
-            setLoading(true);
-            const resultP = await getPosts(0,userId,0);
-            const resultC = await getPosts(0,userId,1);
-            const resultV = await getPosts(0,userId,2);
-            setPosts(resultP);
-            setComments(resultC);
-            setVoted(resultV);
-            const user = await getUserById(userId);
-            if(user!==null){
-                setUsername(user.username);
-                if(user.profile_img_url!==null){
-                    setImageUrl(user.profile_img_url);
-                }
-            }
-            setLoading(false)
-        }
-        populateState();
-    },[userId]);
-    if(loading){
-        return <div>Loading...</div>
-    }
     return(
         <div className="mt-5 flex flex-col gap-5">
             <div className="ml-10 flex gap-5 items-center">
@@ -56,9 +30,9 @@ export default function UserPage({userId}:UserPageInterface){
                 {option===2&&<div className="hover:cursor-pointer hover:underline bg-gray-600 p-3 rounded-full">Voted</div>}
                 {option!==2&&<div className="hover:cursor-pointer hover:underline" onClick={()=>setOption(2)}>Voted</div>}
             </div>
-            {option===0&&<PostList initialPostsArray={posts} fetchFn={(offset)=>getPosts(offset,userId,0)}/>}
-            {option===1&&<PostList initialPostsArray={comments} fetchFn={(offset)=>getPosts(offset,userId,1)}/>}
-            {option===2&&<PostList initialPostsArray={voted} fetchFn={(offset)=>getPosts(offset,userId,2)}/>}
+            {option===0&&<PostList initialPostsArray={createdPosts} fetchFn={(offset)=>getUserPosts(offset,userId)}/>}
+            {option===1&&<PostList initialPostsArray={commentedPosts} fetchFn={(offset)=>getCommentedPosts(offset,userId)}/>}
+            {option===2&&<PostList initialPostsArray={votedPosts} fetchFn={(offset)=>getVotedPosts(offset,userId)}/>}
         </div>
     )
 }

@@ -3,13 +3,20 @@ export type PasswordProps = {
   changePassword: (value: string) => void;
   password: string;
 };
-export type PostType ={
+export type PostType = {
   id:number,
   author_id:number,
   created_at:Date,
   title:string,
   text:string|null,
   image_url:string|null
+}
+export type EnrichedPost = {
+  post:PostType,
+  upvotesAmount:number,
+  downvotesAmount:number,
+  voted:null|boolean,
+  commentsAmount:number,
 }
 export type Comment = {
   id:number,

@@ -5,6 +5,7 @@ import type { PostType } from "./types";
 import type { Comment } from "./types"
 import type { User } from "./types";
 import type { Notification } from "./types";
+import type { EnrichedPost } from "./types";
 const connectionString = process.env.PSQL
 if(!connectionString){
     throw new Error('no connection string provided')
@@ -63,7 +64,6 @@ export async function createUser(email:string,username:string,password:string){
     }
 }
 //posts
-
 export async function insertPost(author_id:number,title:string,text:string|null,imageUrl:string|null){
     try {
             await sql`
@@ -75,20 +75,89 @@ export async function insertPost(author_id:number,title:string,text:string|null,
         return `error message: ${error}`
     }
 }
-/*
-export async function getPosts(offset:number,limit:number){
+export async function getPostsForGlobalFeed(offset:number): Promise<PostType[]>{
     try {
-        const postArray = await sql`
-        SELECT * FROM posts LIMIT ${limit} OFFSET ${offset}
+        const postArray:PostType[] = await sql`
+        SELECT * FROM posts ORDER BY created_at DESC LIMIT 10 OFFSET ${offset}
         `
-        console.log(postArray)
+        return postArray;
+    } catch (error) {
+        console.log(error);
+        return [];
+    }
+}
+export async function getUserPosts(offset:number,userId:number): Promise<PostType[]>{
+    try {
+        const postArray:PostType[] = await sql`
+        SELECT * FROM posts 
+        WHERE author_id = ${userId!}
+        ORDER BY created_at DESC
+        LIMIT 10 OFFSET ${offset} 
+        `
+        return postArray;
+    } catch (error) {
+        console.log(error);
+        return [];
+    }
+}
+export async function getCommentedPosts(offset:number,userId:number): Promise<PostType[]>{
+    try {
+        const comentedPostsIds = await sql`
+        SELECT DISTINCT post_id FROM comments WHERE author_id = ${userId!}
+        `
+        const ids =comentedPostsIds.map(row=>row.post_id);
+        if(ids.length===0){
+            return [];
+        }
+        const postArray = await sql`
+        SELECT * FROM posts
+        WHERE id = ANY(${ids})
+        ORDER BY created_at DESC
+        LIMIT 10 OFFSET ${offset}
+        `
         return postArray as unknown as PostType[];
     } catch (error) {
         console.log(error);
         return [];
     }
 }
-*/
+export async function getVotedPosts(offset:number,userId:number): Promise<PostType[]>{
+    try {
+        const votedPostsIds = await sql`
+        SELECT DISTINCT post_id FROM post_votes WHERE user_id = ${userId!}
+        `
+        const ids = votedPostsIds.map(row=>row.post_id);
+        if(ids.length===0){
+            return [];
+        }
+        const postArray = await sql`
+        SELECT * FROM posts
+        WHERE id = ANY(${ids})
+        ORDER BY created_at DESC
+        LIMIT 10 OFFSET ${offset}
+        `
+        return postArray as unknown as PostType[];
+    } catch (error) {
+        console.log(error);
+        return [];
+    }
+}
+export async function searchPosts(offset:number,query:string){
+    try {
+        const keyword = `%${query}%`;
+        const postArray:PostType[] = await sql`
+        SELECT * FROM posts
+        WHERE title ILIKE ${keyword} OR text ILIKE ${keyword}
+        ORDER BY created_at DESC
+        LIMIT 10 OFFSET ${offset}
+        `
+        return postArray;
+    } catch (error) {
+        console.log(error);
+        return [];
+    }
+}
+//
 type CommentNode = Comment & {
   children: CommentNode[];
 };
@@ -282,104 +351,7 @@ export async function checkCommentVote(commentId:number,userId:number){
         console.log(error);
     }
 }
-//refactored get posts
-export async function getPosts(offset:number,userId:number|null,type:0|1|2|null): Promise<PostType[]>{
-    //type values:
-    //0 -- get posts that are created by user
-    //1 -- get posts that are commented by user
-    //2 -- get posts that are voted by user
-    if(userId===null&&type===null){
-        try {
-            const postArray = await sql`
-            SELECT * FROM posts ORDER BY created_at DESC LIMIT 10 OFFSET ${offset}
-            `
-            return postArray as unknown as PostType[];
-        } catch (error) {
-            console.log(error);
-            return [];
-        }
-    }else if(type===0){
-        try {
-            const postArray = await sql`
-            SELECT * FROM posts 
-            WHERE author_id = ${userId!}
-            ORDER BY created_at DESC
-            LIMIT 10 OFFSET ${offset} 
-            `
-            return postArray as unknown as PostType[];
-        } catch (error) {
-            console.log(error);
-            return [];
-        }
-    }else if(type===1){
-        try {
-            const comentedPostsIds = await sql`
-            SELECT DISTINCT post_id FROM comments WHERE author_id = ${userId!}
-            `
-            const ids =comentedPostsIds.map(row=>row.post_id);
-            if(ids.length===0){
-                return [];
-            }
-            const postArray = await sql`
-            SELECT * FROM posts
-            WHERE id = ANY(${ids})
-            ORDER BY created_at DESC
-            LIMIT 10 OFFSET ${offset}
-            `
-            return postArray as unknown as PostType[];
-        } catch (error) {
-            console.log(error);
-            return [];
-        }
-    }else if(type===2){
-        try {
-            const votedPostsIds = await sql`
-            SELECT DISTINCT post_id FROM post_votes WHERE user_id = ${userId!}
-            `
-            const ids = votedPostsIds.map(row=>row.post_id);
-            if(ids.length===0){
-                return [];
-            }
-            const postArray = await sql`
-            SELECT * FROM posts
-            WHERE id = ANY(${ids})
-            ORDER BY created_at DESC
-            LIMIT 10 OFFSET ${offset}
-            `
-            return postArray as unknown as PostType[];
-        } catch (error) {
-            console.log(error);
-            return [];
-        }
-    }else{
-        return [];
-    }
-}
-//i wrote this function to pass it as prop to postList.tsx in postScroll.tsx
-//because postScroll is server component and i can't define functions inside of it
-//why define separete function? 'cause postList accepts fetchFn(offset) func that returns PostType[]
-//but getPosts is(offset,userId,type), i think you get it 
-//this function is just getPosts with(offset,null,null) arguments
-export async function getPostsForGlobalFeed(offset:number){
-    const result:PostType[] = await getPosts(offset,null,null);
-    return result;
-}
-//searching posts
-export async function searchPosts(offset:number,query:string){
-    try {
-        const keyword = `%${query}%`;
-        const postArray:PostType[] = await sql`
-        SELECT * FROM posts
-        WHERE title ILIKE ${keyword} OR text ILIKE ${keyword}
-        ORDER BY created_at DESC
-        LIMIT 10 OFFSET ${offset}
-        `
-        return postArray;
-    } catch (error) {
-        console.log(error);
-        return [];
-    }
-}
+
 
 export async function editUser(userId:number,username:string,email:string,profileImgUrl:null|string){
     try {
