@@ -40,7 +40,7 @@ export default function PostList({ initialPostsArray,fetchFn,isVerifyed }:PostLi
     }
     return(
        <div className="flex justify-center w-full">
-         <div className="flex flex-col ml-10 mr-10">
+         <div className="w-full max-w-[800px] px-4 sm:px-6 md:px-10 flex flex-col">
             {enrichedPosts.map((enrichedPost)=>(
                 <PostCard key={enrichedPost.post.id} enrichedPost={enrichedPost} userId={isVerifyed}/>
             ))}
