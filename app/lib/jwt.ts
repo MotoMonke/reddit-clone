@@ -41,7 +41,6 @@ export async function verifyToken() {
     if(!tokenCookie){
       return null;
     }
-    console.log('Token value:', tokenCookie.value);
     const { payload } = await jwtVerify(tokenCookie.value, secret);
     const id = payload.userId as number;
     const userCheck = await getUserById(id);

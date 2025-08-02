@@ -1,5 +1,5 @@
 'use client'
-import { EnrichedPost, PostType } from "@/app/lib/types"
+import { EnrichedPost } from "@/app/lib/types"
 import { searchPosts } from "@/app/lib/db"
 import PostList from "./postScroll/postList"
 interface SearchPageInterface{

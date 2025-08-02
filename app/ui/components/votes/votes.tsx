@@ -1,5 +1,5 @@
 'use lient';
-import { useState,useEffect } from 'react';
+import { useState } from 'react';
 import { votePost,voteComment} from '@/app/lib/db';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';

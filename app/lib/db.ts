@@ -3,7 +3,6 @@ import postgres from "postgres";
 import bcrypt from 'bcryptjs';
 import type { User,Notification,PostType,EnrichedPost,Comment,EnrichedComment,CommentNode, ShortUser, EnrichedNotification } from "./types"
 import { verifyToken } from "./jwt";
-import { redirect } from "next/navigation";
 const connectionString = process.env.PSQL
 if(!connectionString){
     throw new Error('no connection string provided')

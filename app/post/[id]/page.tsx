@@ -1,6 +1,6 @@
 import { getPostAndComments } from "@/app/lib/db";
 import PostCard from "@/app/ui/components/postScroll/postCard";
-import { EnrichedComment,EnrichedPost,CommentNode } from "@/app/lib/types";
+import { EnrichedPost,CommentNode } from "@/app/lib/types";
 import CommentsTree from "@/app/ui/components/comments/commentsTree";
 export default async function PostPage({ params }: { params: Promise<{ id: number }> }) {
   const id = (await params).id;

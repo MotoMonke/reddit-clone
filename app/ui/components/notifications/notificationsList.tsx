@@ -1,4 +1,4 @@
-import type { EnrichedNotification, Notification } from "@/app/lib/types";
+import type { EnrichedNotification } from "@/app/lib/types";
 import NotificationCard from "./notificationCard";
 interface NotificationListInterface{
     enrichedNotifications:EnrichedNotification[]

@@ -1,5 +1,5 @@
 'use client'
-import type { EnrichedComment,Comment,CommentNode } from "@/app/lib/types";
+import type { Comment,CommentNode, User } from "@/app/lib/types";
 import CommnetInput from "./commentInput";
 import OneComment from "./comment";
 import { useState } from "react";
@@ -8,16 +8,22 @@ interface CommentsTreeProps{
     postId:number,
     userId:number|null,
 }
-
+interface functionInterface{
+        comment:Comment,
+        author:User,
+}
 export default function CommentsTree({enrichedComments,postId,userId}:CommentsTreeProps){
     const [commentArray,setCommentArray] = useState(enrichedComments);
-    function onCommentCreated(newComment:Comment){
+    function onCommentCreated({comment,author}:functionInterface){
         //enriching comment to match commentArray data type
+        
         const commentNode:CommentNode = {
-            comment:newComment,
+            comment:comment,
             upvotesAmount:0,
             downvotesAmount:0,
             voted:null,
+            authorUsername:author.username,
+            authorProfPicUrl:author.profile_img_url,
             children:[]
         }
         setCommentArray(prev=>[...prev,commentNode])

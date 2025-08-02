@@ -1,10 +1,8 @@
 'use client';
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState,useEffect } from "react";
+import { useState} from "react";
 import { logout } from "@/app/lib/actions/auth";
-import { getUserById } from "@/app/lib/db";
-import { User } from "@/app/lib/types";
 interface ProfileIconInterface{
     userId:number,
     imageUrl:string|null

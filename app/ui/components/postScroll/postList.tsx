@@ -29,6 +29,7 @@ export default function PostList({ initialPostsArray,fetchFn,isVerifyed }:PostLi
         if (inView&&!isLoading&&hasMore) {
             loadMorePosts();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [inView])
     if(initialPostsArray.length===0){
         return(

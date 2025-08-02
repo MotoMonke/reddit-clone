@@ -2,7 +2,7 @@
 import { useState} from "react"
 import PostList from "../postScroll/postList"
 import { getUserPosts,getCommentedPosts,getVotedPosts } from "@/app/lib/db"
-import { EnrichedPost, PostType } from "@/app/lib/types"
+import { EnrichedPost } from "@/app/lib/types"
 import Image from "next/image"
 interface UserPageInterface{
     userId:number,
