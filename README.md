@@ -1,8 +1,13 @@
-# 🧠 Reddit Clone App
+# Reddit Clone App
 
 A full-stack Reddit-inspired web application built for learning purposes.
 
 ---
+
+🌐 Live Demo:
+
+https://reddit-clone-liard-delta.vercel.app/
+
 
 ## ✨ Features
 
@@ -95,6 +100,17 @@ public folder contains  svg icons
 | `vote`       | BOOLEAN  | `true` for upvote, `false` down  |
 
 ---
+
+### `notifications`
+| Column        | Type      | Description                                          |
+| ------------- | --------- | ---------------------------------------------------- |
+| `id`          | INTEGER   | Primary key (auto-increment identity)                |
+| `post_id`     | INTEGER   | FK → posts(id), not null                             |
+| `author_id`   | INTEGER   | FK → users(id), not null (who performed action)      |
+| `receiver_id` | INTEGER   | FK → users(id), not null (who receives notification) |
+| `comment_id`  | INTEGER   | Optional FK → comments(id)                           |
+| `is_read`     | BOOLEAN   | Not null, whether notification was read              |
+| `created_at`  | TIMESTAMP | Default: `NOW()`                                     |
 
 ## 🚀 Hosting
 
