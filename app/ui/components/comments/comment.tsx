@@ -1,18 +1,27 @@
 import { useState } from "react";
-import type { Comment } from "@/app/lib/types";
+import type { Comment, CommentNode } from "@/app/lib/types";
 import Votes from "../votes/votes";
+import UserLink from "../user/userLink";
 import CommnetInput from "./commentInput";
 interface OneCommentProps{
-    comment:Comment,
+    enrichedComment:CommentNode,
     postId:number,
-    onCommentCreated?:(newComment:Comment)=>void
+    userId:number|null,
 }
-export default function OneComment({comment,postId}:OneCommentProps){
-    const [commentArray,setCommentArray] = useState(comment.children||[]);
+export default function OneComment({enrichedComment,postId,userId}:OneCommentProps){
+    const [commentArray,setCommentArray] = useState<CommentNode[]>(enrichedComment.children||[]);
     const [isExpanded, setIsExpanded] = useState(true);
     
     function onCommentCreated(newComment:Comment){
-        setCommentArray(prev=>[...prev,newComment]);
+        //enriching comment to match commentArray data type
+        const commentNode:CommentNode = {
+            comment:newComment,
+            upvotesAmount:0,
+            downvotesAmount:0,
+            voted:null,
+            children:[]
+        }
+        setCommentArray(prev=>[...prev,commentNode]);
     }
     
     return(
@@ -27,23 +36,25 @@ export default function OneComment({comment,postId}:OneCommentProps){
                 
                 <div className="flex-1">
                     <div className="flex items-center gap-1 text-xs text-gray-500 mb-1">
+                        {/*<UserLink userId={enrichedComment.comment.author_id}/> */}
                         <span>•</span>
-                        <span>{new Date(comment.created_at!).toLocaleString()}</span>
+                        <span>{new Date(enrichedComment.comment.created_at!).toLocaleString()}</span>
                     </div>
                     
                     {isExpanded && (
                         <>
-                            <p className="mb-2">{comment.body}</p>
+                            <p className="mb-2">{enrichedComment.comment.body}</p>
                             
                             <div className="flex items-center gap-4 text-xs">
-                                <Votes isPost={false} id={comment.id} />
+                                <Votes isPost={false} id={enrichedComment.comment.id} initialVote={enrichedComment.voted} likes={enrichedComment.upvotesAmount} dislikes={enrichedComment.downvotesAmount} userId={userId} />
                             </div>
                             
                             <div className="mt-3 max-w-[400px]">
                                 <CommnetInput 
                                     postId={postId} 
-                                    parentId={comment.id} 
+                                    parentId={enrichedComment.comment.id} 
                                     onCommentCreated={onCommentCreated} 
+                                    userId={userId}
                                 />
                             </div>
                         </>
@@ -55,10 +66,10 @@ export default function OneComment({comment,postId}:OneCommentProps){
                 <div className="border-l-2 border-gray-200 pl-2">
                     {commentArray.map((child)=>(
                         <OneComment 
-                            key={child.id} 
+                            key={child.comment.id} 
                             postId={postId} 
-                            comment={child} 
-                            onCommentCreated={onCommentCreated}
+                            enrichedComment={child} 
+                            userId={userId}
                         />
                     ))}
                 </div>

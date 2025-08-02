@@ -1,15 +1,16 @@
 'use client';
 import { useState,useEffect } from "react";
-import { PostType } from "@/app/lib/types";
+import { EnrichedPost } from "@/app/lib/types";
 import PostCard from "./postCard";
 
 import { useInView } from "react-intersection-observer";
 interface PostListInterface{
-    initialPostsArray: PostType[],
-    fetchFn:(offset:number) => Promise<PostType[]>;
+    initialPostsArray: EnrichedPost[],
+    fetchFn:(offset:number) => Promise<EnrichedPost[]>,
+    isVerifyed:number|null,
 }
-export default function PostList({ initialPostsArray,fetchFn }:PostListInterface){
-    const [posts, setPosts] = useState<PostType[]>(initialPostsArray);
+export default function PostList({ initialPostsArray,fetchFn,isVerifyed }:PostListInterface){
+    const [enrichedPosts, setEnrichedPosts] = useState<EnrichedPost[]>(initialPostsArray);
     const [offset,setOffset] = useState(10);
     const [hasMore,setHasMore] = useState(true);
     const [isLoading,setIsLoading] = useState(false);
@@ -17,7 +18,7 @@ export default function PostList({ initialPostsArray,fetchFn }:PostListInterface
     async function loadMorePosts(){
         setIsLoading(true);
         const newPosts = await fetchFn(offset);
-        setPosts(posts=>[...posts,...newPosts]);
+        setEnrichedPosts(posts=>[...posts,...newPosts]);
         setOffset(offset => offset + 10);
         if(newPosts.length<10){
             setHasMore(false);
@@ -39,8 +40,8 @@ export default function PostList({ initialPostsArray,fetchFn }:PostListInterface
     return(
        <div className="flex justify-center w-full">
          <div className="flex flex-col ml-10 mr-10">
-            {posts.map((post)=>(
-                <PostCard key={post.id} post={post}/>
+            {enrichedPosts.map((enrichedPost)=>(
+                <PostCard key={enrichedPost.post.id} enrichedPost={enrichedPost} userId={isVerifyed}/>
             ))}
             {hasMore&&<div ref={ref}>
                 Loading...

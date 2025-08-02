@@ -1,86 +1,55 @@
 'use lient';
 import { useState,useEffect } from 'react';
-import { getPostVotesAmount,checkPostVote,votePost,voteComment,getCommentVotesAmount,checkCommentVote } from '@/app/lib/db';
-import { verifyToken } from '@/app/lib/jwt';
+import { votePost,voteComment} from '@/app/lib/db';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 interface VotesInterface {
-  id: number;
-  isPost: boolean;
+  id: number,
+  isPost: boolean,
+  initialVote: boolean|null,
+  likes:number,
+  dislikes:number,
+  userId:number|null
 }
 
-export default function Votes({ id,isPost }:VotesInterface) {
+export default function Votes({ id,isPost,initialVote,likes,dislikes,userId }:VotesInterface) {
     const router = useRouter();
-    const [likesAmount,setLikesAmount] = useState(0);
-    const [dislikesAmount,setDislikesAmount] = useState(0);
-    const [userId,setUserId] = useState<null|number>(null);
+    const functions = isPost?{serverVote:votePost}:{serverVote:voteComment};
+    const [likesAmount,setLikesAmount] = useState(likes);
+    const [dislikesAmount,setDislikesAmount] = useState(dislikes);
     //true means upvote, false means downvote, null means no vote
-    const [voted,setVoted] = useState<null|true|false>(null);
-    const functions = isPost?{getAmount:getPostVotesAmount,checkVote:checkPostVote,vote:votePost}:{getAmount:getCommentVotesAmount,checkVote:checkCommentVote,vote:voteComment};
-    useEffect(()=>{
-        async function getVotes(){
-            const result = await functions.getAmount(id);
-            if(result===undefined){
-                setLikesAmount(0);
-                setDislikesAmount(0);  
-            }else{
-                setLikesAmount(result.upVotes);
-                setDislikesAmount(result.downVotes);
-            }
-        }
-        async function checkUser(){
-            //returns userId or null if not logged in
-            const answer = await verifyToken();
-            if(answer!==null){
-                setUserId(answer);
-            }
-        }
-        getVotes();
-        checkUser();
-    },[functions,id]);
-    useEffect(()=>{
-        if(userId!==null){
-            async function checkIfVoted(){
-                //returns null true or false
-                const result = await functions.checkVote(id,userId!);
-                setVoted(result);
-            }
-            checkIfVoted();
-        }
-    },[userId,functions,id])
+    const [voted,setVoted] = useState<null|true|false>(initialVote);
     async function vote(value:boolean){
-        if(userId!==null){
-            if(voted===null){
-                setVoted(value);
-                if(value){
-                    setLikesAmount(prev=>prev+1);
-                }else{
-                    setDislikesAmount(prev=>prev+1);
-                }
-            }else if(voted){
-                if(value){
-                    setVoted(null);
-                    setLikesAmount(prev=>prev-1);
-                }else{
-                    setVoted(false);
-                    setLikesAmount(prev=>prev-1);
-                    setDislikesAmount(prev=>prev+1);
-                }
-            }else{
-                if(value){
-                    setVoted(true);
-                    setLikesAmount(prev=>prev+1);
-                    setDislikesAmount(prev=>prev-1);
-                }else{
-                    setVoted(null);
-                    setDislikesAmount(prev=>prev-1);
-                }
-            }
-            await functions.vote(value,userId,id);
-        }else{
+        if(userId===null){
             router.push('/login');
         }
-
+        await functions.serverVote(value,id,userId!);
+        if(voted===null){
+            setVoted(value);
+            if(value){
+                setLikesAmount(prev=>prev+1);
+            }else{
+                setDislikesAmount(prev=>prev+1);
+            }
+        }else if(voted){
+            if(value){
+                setVoted(null);
+                setLikesAmount(prev=>prev-1);
+            }else{
+                setVoted(false);
+                setLikesAmount(prev=>prev-1);
+                setDislikesAmount(prev=>prev+1);
+            }
+        }else{
+            if(value){
+                setVoted(true);
+                setLikesAmount(prev=>prev+1);
+                setDislikesAmount(prev=>prev-1);
+            }else{
+                setVoted(null);
+                setDislikesAmount(prev=>prev-1);
+            }
+        }
     }
   return (
     <div className='flex flex-row bg-[#2A3236] pt-1 pb-1 rounded-full justify-center gap-2 min-w-25'>

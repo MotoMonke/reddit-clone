@@ -7,26 +7,17 @@ import type { Comment } from "@/app/lib/types";
 interface CommentInput{
     postId:number,
     parentId:number|null,
-    onCommentCreated:(newComment:Comment)=>void
+    onCommentCreated:(newComment:Comment)=>void,
+    userId:number|null
 }
-export default function CommnetInput({postId,parentId,onCommentCreated}:CommentInput){
+export default function CommnetInput({postId,parentId,onCommentCreated,userId}:CommentInput){
     const router = useRouter();
     const [result,setResult] = useState('');
-    const [text,setText] = useState('');
-    const [isVerified,setIsVerified] = useState(false);
-    const [userId,setUserId] = useState<null|number>(null);
-    useEffect(()=>{
-        async function checkUser(){
-            //returns userId or null if not logged in
-            const answer = await verifyToken();
-            if(answer!==null){
-                setIsVerified(true);
-                setUserId(answer);
-            }
-        }
-        checkUser();
-    },[]);
+    const [text,setText] = useState('');;
     async function submitComment(){
+        if(userId===null){
+            router.push('/login');
+        }
         if(text.length===0){
             setResult('Enter some text please');
             return;
@@ -41,7 +32,7 @@ export default function CommnetInput({postId,parentId,onCommentCreated}:CommentI
         }
     }
     function handleInputClick(){
-        if(!isVerified){
+        if(userId===null){
             router.push('/login');
         }
     }
@@ -66,7 +57,7 @@ export default function CommnetInput({postId,parentId,onCommentCreated}:CommentI
                 <button 
                     onClick={submitComment}
                     className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-medium disabled:opacity-50"
-                    disabled={!isVerified || text.length === 0}
+                    disabled={userId===null || text.length === 0}
                 >
                     Comment
                 </button>

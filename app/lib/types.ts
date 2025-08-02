@@ -25,7 +25,12 @@ export type Comment = {
   parent_id:number|null,
   body:string,
   created_at?:Date,
-  children?:Comment[],
+}
+export type EnrichedComment = {
+  comment:Comment,
+  upvotesAmount:number,
+  downvotesAmount:number,
+  voted:null|boolean,
 }
 export type User = {
     id:number,
@@ -43,3 +48,18 @@ export type Notification = {
   is_read:boolean,
   created_at:Date
 }
+export type PostVote = {
+  id:number,
+  post_id:number,
+  user_id:number,
+  vote:boolean
+}
+export type CommentVote = {
+  id:number,
+  comment_id:number,
+  user_id:number,
+  vote:boolean
+}
+export type CommentNode = EnrichedComment & {
+  children: CommentNode[];
+};

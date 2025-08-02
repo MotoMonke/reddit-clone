@@ -2,17 +2,18 @@
 import { useState} from "react"
 import PostList from "../postScroll/postList"
 import { getUserPosts,getCommentedPosts,getVotedPosts } from "@/app/lib/db"
-import { PostType } from "@/app/lib/types"
+import { EnrichedPost, PostType } from "@/app/lib/types"
 import Image from "next/image"
 interface UserPageInterface{
     userId:number,
-    createdPosts:PostType[],
-    commentedPosts:PostType[],
-    votedPosts:PostType[],
+    createdPosts:EnrichedPost[],
+    commentedPosts:EnrichedPost[],
+    votedPosts:EnrichedPost[],
     username:string,
     imageUrl:string,
+    isVerifyed:number|null
 }
-export default function UserPage({userId,createdPosts,commentedPosts,votedPosts,username,imageUrl}:UserPageInterface){
+export default function UserPage({userId,createdPosts,commentedPosts,votedPosts,username,imageUrl,isVerifyed}:UserPageInterface){
     // i didn't thought about better way to toggle betwen user posts comments and voted posts
     const [option,setOption] = useState<0|1|2>(0);
     //
@@ -30,9 +31,9 @@ export default function UserPage({userId,createdPosts,commentedPosts,votedPosts,
                 {option===2&&<div className="hover:cursor-pointer hover:underline bg-gray-600 p-3 rounded-full">Voted</div>}
                 {option!==2&&<div className="hover:cursor-pointer hover:underline" onClick={()=>setOption(2)}>Voted</div>}
             </div>
-            {option===0&&<PostList initialPostsArray={createdPosts} fetchFn={(offset)=>getUserPosts(offset,userId)}/>}
-            {option===1&&<PostList initialPostsArray={commentedPosts} fetchFn={(offset)=>getCommentedPosts(offset,userId)}/>}
-            {option===2&&<PostList initialPostsArray={votedPosts} fetchFn={(offset)=>getVotedPosts(offset,userId)}/>}
+            {option===0&&<PostList initialPostsArray={createdPosts} fetchFn={(offset)=>getUserPosts(offset,userId)} isVerifyed={isVerifyed}/>}
+            {option===1&&<PostList initialPostsArray={commentedPosts} fetchFn={(offset)=>getCommentedPosts(offset,userId)} isVerifyed={isVerifyed}/>}
+            {option===2&&<PostList initialPostsArray={votedPosts} fetchFn={(offset)=>getVotedPosts(offset,userId)} isVerifyed={isVerifyed}/>}
         </div>
     )
 }

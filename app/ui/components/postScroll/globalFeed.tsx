@@ -1,9 +1,11 @@
 import { getPostsForGlobalFeed } from "@/app/lib/db"
-import { PostType } from "@/app/lib/types";
+import { EnrichedPost } from "@/app/lib/types";
 import PostList from "./postList";
+import { verifyToken } from "@/app/lib/jwt";
 export async function GlobalFeed(){
-    const initialPostsArray:PostType[] = await getPostsForGlobalFeed(0);
+    const initialPostsArray:EnrichedPost[] = await getPostsForGlobalFeed(0);
+    const isVerifyed = await verifyToken();
     return(
-        <PostList initialPostsArray={initialPostsArray} fetchFn={getPostsForGlobalFeed}/>
+        <PostList isVerifyed={isVerifyed} initialPostsArray={initialPostsArray} fetchFn={getPostsForGlobalFeed}/>
     )
 }

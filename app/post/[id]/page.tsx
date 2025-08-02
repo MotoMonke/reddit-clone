@@ -1,7 +1,6 @@
 import { getPostAndComments } from "@/app/lib/db";
 import PostCard from "@/app/ui/components/postScroll/postCard";
-import { PostType } from "@/app/lib/types";
-import { Comment } from "@/app/lib/types";
+import { EnrichedComment,EnrichedPost,CommentNode } from "@/app/lib/types";
 import CommentsTree from "@/app/ui/components/comments/commentsTree";
 export default async function PostPage({ params }: { params: Promise<{ id: number }> }) {
   const id = (await params).id;
@@ -9,14 +8,15 @@ export default async function PostPage({ params }: { params: Promise<{ id: numbe
   if(typeof result === 'string'){
      return <div>Post not found or error: {result}</div>;
   }
-  const post: PostType = result.post;
-  const comments: Comment[] = result.tree;
+  const post: EnrichedPost = result.post;
+  const comments: CommentNode[] = result.tree;
+  const userId: number|null = result.userId
   return (
     <div className="ml-5 mr-5 ">
       <div className="flex flex-col items-center">
-        <PostCard post={post} />
+        <PostCard enrichedPost={post} userId={userId}/>
       </div>
-      <CommentsTree comments={comments} postId={id}/>
+      <CommentsTree enrichedComments={comments} postId={id} userId={userId}/>
     </div>
   );
 }

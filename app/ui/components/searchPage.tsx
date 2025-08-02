@@ -1,12 +1,13 @@
 'use client'
-import { PostType } from "@/app/lib/types"
+import { EnrichedPost, PostType } from "@/app/lib/types"
 import { searchPosts } from "@/app/lib/db"
 import PostList from "./postScroll/postList"
 interface SearchPageInterface{
-    initialPosts:PostType[],
+    initialPosts:EnrichedPost[],
     query:string,
+    isVerifyed:number|null
 }
-export default function SearchPage({initialPosts,query}:SearchPageInterface){
+export default function SearchPage({initialPosts,query,isVerifyed}:SearchPageInterface){
     return(
         <div>
         <div>Search results for &quot;{query}&quot;</div>
@@ -14,6 +15,7 @@ export default function SearchPage({initialPosts,query}:SearchPageInterface){
           <PostList
             initialPostsArray={initialPosts}
             fetchFn={(offset) => searchPosts(offset, query)}
+            isVerifyed={isVerifyed}
           />
         )}
       </div>

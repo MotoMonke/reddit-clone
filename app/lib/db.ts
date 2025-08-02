@@ -1,11 +1,9 @@
 'use server'
 import postgres from "postgres";
 import bcrypt from 'bcryptjs';
-import type { PostType } from "./types";
-import type { Comment } from "./types"
-import type { User } from "./types";
-import type { Notification } from "./types";
-import type { EnrichedPost } from "./types";
+import type { User,Notification,PostType,EnrichedPost,Comment,EnrichedComment,CommentNode } from "./types"
+import { verifyToken } from "./jwt";
+import { redirect } from "next/navigation";
 const connectionString = process.env.PSQL
 if(!connectionString){
     throw new Error('no connection string provided')
@@ -75,106 +73,387 @@ export async function insertPost(author_id:number,title:string,text:string|null,
         return `error message: ${error}`
     }
 }
-export async function getPostsForGlobalFeed(offset:number): Promise<PostType[]>{
-    try {
-        const postArray:PostType[] = await sql`
-        SELECT * FROM posts ORDER BY created_at DESC LIMIT 10 OFFSET ${offset}
-        `
-        return postArray;
-    } catch (error) {
-        console.log(error);
-        return [];
+export async function getPostsForGlobalFeed(offset: number): Promise<EnrichedPost[]> {
+  try {
+    const userId = await verifyToken();
+
+    // 1. Get posts (paginated)
+    const rawPosts: PostType[] = await sql`
+      SELECT * FROM posts 
+      ORDER BY created_at DESC 
+      LIMIT 10 OFFSET ${offset}
+    `;
+
+    if (rawPosts.length === 0) return [];
+
+    const postIds = rawPosts.map(p => p.id);
+
+    // 2. Get comments count per post
+    const commentsCountsResult = await sql`
+      SELECT post_id, COUNT(*) AS count FROM comments
+      WHERE post_id = ANY(${postIds})
+      GROUP BY post_id
+    `;
+    const commentCountsMap = new Map<number, number>();
+    commentsCountsResult.forEach(row => {
+      commentCountsMap.set(row.post_id, Number(row.count));
+    });
+
+    // 3. Get vote counts (upvotes and downvotes)
+    const votesResult = await sql`
+      SELECT post_id, vote, COUNT(*) as count
+      FROM post_votes
+      WHERE post_id = ANY(${postIds})
+      GROUP BY post_id, vote
+    `;
+    const votesMap = new Map<number, { upvotes: number; downvotes: number }>();
+    rawPosts.forEach(post => {
+      votesMap.set(post.id, { upvotes: 0, downvotes: 0 });
+    });
+    votesResult.forEach(row => {
+      const voteInfo = votesMap.get(row.post_id)!;
+      if (row.vote) {
+        voteInfo.upvotes = Number(row.count);
+      } else {
+        voteInfo.downvotes = Number(row.count);
+      }
+    });
+
+    // 4. Get user vote for each post (if logged in)
+    const userVotesMap = new Map<number, boolean>();
+    if (userId !== null) {
+      const userVotes = await sql`
+        SELECT post_id, vote FROM post_votes
+        WHERE user_id = ${userId} AND post_id = ANY(${postIds})
+      `;
+      userVotes.forEach(row => {
+        userVotesMap.set(row.post_id, row.vote);
+      });
     }
+
+    // 5. Combine everything into EnrichedPost[]
+    const enrichedPosts: EnrichedPost[] = rawPosts.map(post => ({
+      post,
+      commentsAmount: commentCountsMap.get(post.id) ?? 0,
+      upvotesAmount: votesMap.get(post.id)?.upvotes ?? 0,
+      downvotesAmount: votesMap.get(post.id)?.downvotes ?? 0,
+      voted: userVotesMap.get(post.id) ?? null
+    }));
+
+    return enrichedPosts;
+
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
 }
-export async function getUserPosts(offset:number,userId:number): Promise<PostType[]>{
+
+export async function getUserPosts(offset:number,authorId:number): Promise<EnrichedPost[]>{
     try {
-        const postArray:PostType[] = await sql`
-        SELECT * FROM posts 
-        WHERE author_id = ${userId!}
-        ORDER BY created_at DESC
-        LIMIT 10 OFFSET ${offset} 
-        `
-        return postArray;
-    } catch (error) {
-        console.log(error);
-        return [];
+    const userId = await verifyToken();
+    // 1. Get posts (paginated)
+    const rawPosts: PostType[] = await sql`
+      SELECT * FROM posts 
+      WHERE author_id = ${authorId}
+      ORDER BY created_at DESC 
+      LIMIT 10 OFFSET ${offset}
+    `;
+
+    if (rawPosts.length === 0) return [];
+
+    const postIds = rawPosts.map(p => p.id);
+
+    // 2. Get comments count per post
+    const commentsCountsResult = await sql`
+      SELECT post_id, COUNT(*) AS count FROM comments
+      WHERE post_id = ANY(${postIds})
+      GROUP BY post_id
+    `;
+    const commentCountsMap = new Map<number, number>();
+    commentsCountsResult.forEach(row => {
+      commentCountsMap.set(row.post_id, Number(row.count));
+    });
+
+    // 3. Get vote counts (upvotes and downvotes)
+    const votesResult = await sql`
+      SELECT post_id, vote, COUNT(*) as count
+      FROM post_votes
+      WHERE post_id = ANY(${postIds})
+      GROUP BY post_id, vote
+    `;
+    const votesMap = new Map<number, { upvotes: number; downvotes: number }>();
+    rawPosts.forEach(post => {
+      votesMap.set(post.id, { upvotes: 0, downvotes: 0 });
+    });
+    votesResult.forEach(row => {
+      const voteInfo = votesMap.get(row.post_id)!;
+      if (row.vote) {
+        voteInfo.upvotes = Number(row.count);
+      } else {
+        voteInfo.downvotes = Number(row.count);
+      }
+    });
+
+    // 4. Get user vote for each post (if logged in)
+    const userVotesMap = new Map<number, boolean>();
+    if (userId !== null) {
+      const userVotes = await sql`
+        SELECT post_id, vote FROM post_votes
+        WHERE user_id = ${userId} AND post_id = ANY(${postIds})
+      `;
+      userVotes.forEach(row => {
+        userVotesMap.set(row.post_id, row.vote);
+      });
     }
+
+    // 5. Combine everything into EnrichedPost[]
+    const enrichedPosts: EnrichedPost[] = rawPosts.map(post => ({
+      post,
+      commentsAmount: commentCountsMap.get(post.id) ?? 0,
+      upvotesAmount: votesMap.get(post.id)?.upvotes ?? 0,
+      downvotesAmount: votesMap.get(post.id)?.downvotes ?? 0,
+      voted: userVotesMap.get(post.id) ?? null
+    }));
+
+    return enrichedPosts;
+
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
 }
-export async function getCommentedPosts(offset:number,userId:number): Promise<PostType[]>{
+export async function getCommentedPosts(offset:number,comentAuthorId:number): Promise<EnrichedPost[]>{
     try {
-        const comentedPostsIds = await sql`
-        SELECT DISTINCT post_id FROM comments WHERE author_id = ${userId!}
-        `
-        const ids =comentedPostsIds.map(row=>row.post_id);
-        if(ids.length===0){
-            return [];
-        }
-        const postArray = await sql`
+        const userId = await verifyToken();
+        const rawPosts:PostType[] = await sql`
         SELECT * FROM posts
-        WHERE id = ANY(${ids})
+        WHERE id IN (
+        SELECT DISTINCT post_id FROM comments WHERE author_id = ${comentAuthorId}
+        )
         ORDER BY created_at DESC
         LIMIT 10 OFFSET ${offset}
         `
-        return postArray as unknown as PostType[];
+        if (rawPosts.length === 0) return [];
+        const postIds = rawPosts.map(post => post.id);
+        // 2. Get comments count per post
+        const commentsCountsResult = await sql`
+        SELECT post_id, COUNT(*) AS count FROM comments
+        WHERE post_id = ANY(${postIds})
+        GROUP BY post_id
+        `;
+        const commentCountsMap = new Map<number, number>();
+        commentsCountsResult.forEach(row => {
+        commentCountsMap.set(row.post_id, Number(row.count));
+        });
+
+        // 3. Get vote counts (upvotes and downvotes)
+        const votesResult = await sql`
+        SELECT post_id, vote, COUNT(*) as count
+        FROM post_votes
+        WHERE post_id = ANY(${postIds})
+        GROUP BY post_id, vote
+        `;
+        const votesMap = new Map<number, { upvotes: number; downvotes: number }>();
+        rawPosts.forEach(post => {
+        votesMap.set(post.id, { upvotes: 0, downvotes: 0 });
+        });
+        votesResult.forEach(row => {
+        const voteInfo = votesMap.get(row.post_id)!;
+        if (row.vote) {
+            voteInfo.upvotes = Number(row.count);
+        } else {
+            voteInfo.downvotes = Number(row.count);
+        }
+        });
+
+        // 4. Get user vote for each post (if logged in)
+        const userVotesMap = new Map<number, boolean>();
+        if (userId !== null) {
+        const userVotes = await sql`
+            SELECT post_id, vote FROM post_votes
+            WHERE user_id = ${userId} AND post_id = ANY(${postIds})
+        `;
+        userVotes.forEach(row => {
+            userVotesMap.set(row.post_id, row.vote);
+        });
+        }
+
+        // 5. Combine everything into EnrichedPost[]
+        const enrichedPosts: EnrichedPost[] = rawPosts.map(post => ({
+        post,
+        commentsAmount: commentCountsMap.get(post.id) ?? 0,
+        upvotesAmount: votesMap.get(post.id)?.upvotes ?? 0,
+        downvotesAmount: votesMap.get(post.id)?.downvotes ?? 0,
+        voted: userVotesMap.get(post.id) ?? null
+        }));
+
+        return enrichedPosts;
+
     } catch (error) {
         console.log(error);
         return [];
     }
 }
-export async function getVotedPosts(offset:number,userId:number): Promise<PostType[]>{
+export async function getVotedPosts(offset:number,voteAuthorId:number): Promise<EnrichedPost[]>{
     try {
-        const votedPostsIds = await sql`
-        SELECT DISTINCT post_id FROM post_votes WHERE user_id = ${userId!}
-        `
-        const ids = votedPostsIds.map(row=>row.post_id);
-        if(ids.length===0){
-            return [];
-        }
-        const postArray = await sql`
+        const userId = await verifyToken();
+        const rawPosts:PostType[] = await sql`
         SELECT * FROM posts
-        WHERE id = ANY(${ids})
+        WHERE id IN (
+        SELECT DISTINCT post_id FROM post_votes WHERE user_id = ${voteAuthorId}
+        )
         ORDER BY created_at DESC
         LIMIT 10 OFFSET ${offset}
         `
-        return postArray as unknown as PostType[];
+        if (rawPosts.length === 0) return [];
+        const postIds = rawPosts.map(post => post.id);
+        // 2. Get comments count per post
+        const commentsCountsResult = await sql`
+        SELECT post_id, COUNT(*) AS count FROM comments
+        WHERE post_id = ANY(${postIds})
+        GROUP BY post_id
+        `;
+        const commentCountsMap = new Map<number, number>();
+        commentsCountsResult.forEach(row => {
+        commentCountsMap.set(row.post_id, Number(row.count));
+        });
+
+        // 3. Get vote counts (upvotes and downvotes)
+        const votesResult = await sql`
+        SELECT post_id, vote, COUNT(*) as count
+        FROM post_votes
+        WHERE post_id = ANY(${postIds})
+        GROUP BY post_id, vote
+        `;
+        const votesMap = new Map<number, { upvotes: number; downvotes: number }>();
+        rawPosts.forEach(post => {
+        votesMap.set(post.id, { upvotes: 0, downvotes: 0 });
+        });
+        votesResult.forEach(row => {
+        const voteInfo = votesMap.get(row.post_id)!;
+        if (row.vote) {
+            voteInfo.upvotes = Number(row.count);
+        } else {
+            voteInfo.downvotes = Number(row.count);
+        }
+        });
+
+        // 4. Get user vote for each post (if logged in)
+        const userVotesMap = new Map<number, boolean>();
+        if (userId !== null) {
+        const userVotes = await sql`
+            SELECT post_id, vote FROM post_votes
+            WHERE user_id = ${userId} AND post_id = ANY(${postIds})
+        `;
+        userVotes.forEach(row => {
+            userVotesMap.set(row.post_id, row.vote);
+        });
+        }
+
+        // 5. Combine everything into EnrichedPost[]
+        const enrichedPosts: EnrichedPost[] = rawPosts.map(post => ({
+        post,
+        commentsAmount: commentCountsMap.get(post.id) ?? 0,
+        upvotesAmount: votesMap.get(post.id)?.upvotes ?? 0,
+        downvotesAmount: votesMap.get(post.id)?.downvotes ?? 0,
+        voted: userVotesMap.get(post.id) ?? null
+        }));
+
+        return enrichedPosts;
     } catch (error) {
         console.log(error);
         return [];
     }
 }
-export async function searchPosts(offset:number,query:string){
+export async function searchPosts(offset:number,query:string):Promise<EnrichedPost[]>{
+    const userId = await verifyToken();
     try {
         const keyword = `%${query}%`;
-        const postArray:PostType[] = await sql`
+        const rawPosts:PostType[] = await sql`
         SELECT * FROM posts
         WHERE title ILIKE ${keyword} OR text ILIKE ${keyword}
         ORDER BY created_at DESC
         LIMIT 10 OFFSET ${offset}
         `
-        return postArray;
+        if(rawPosts.length===0){
+            return [];
+        }
+        const postIds =rawPosts.map(row=>row.id);
+        // 2. Get comments count per post
+        const commentsCountsResult = await sql`
+        SELECT post_id, COUNT(*) AS count FROM comments
+        WHERE post_id = ANY(${postIds})
+        GROUP BY post_id
+        `;
+        const commentCountsMap = new Map<number, number>();
+        commentsCountsResult.forEach(row => {
+        commentCountsMap.set(row.post_id, Number(row.count));
+        });
+
+        // 3. Get vote counts (upvotes and downvotes)
+        const votesResult = await sql`
+        SELECT post_id, vote, COUNT(*) as count
+        FROM post_votes
+        WHERE post_id = ANY(${postIds})
+        GROUP BY post_id, vote
+        `;
+        const votesMap = new Map<number, { upvotes: number; downvotes: number }>();
+        rawPosts.forEach(post => {
+        votesMap.set(post.id, { upvotes: 0, downvotes: 0 });
+        });
+        votesResult.forEach(row => {
+        const voteInfo = votesMap.get(row.post_id)!;
+        if (row.vote) {
+            voteInfo.upvotes = Number(row.count);
+        } else {
+            voteInfo.downvotes = Number(row.count);
+        }
+        });
+
+        // 4. Get user vote for each post (if logged in)
+        const userVotesMap = new Map<number, boolean>();
+        if (userId !== null) {
+        const userVotes = await sql`
+            SELECT post_id, vote FROM post_votes
+            WHERE user_id = ${userId} AND post_id = ANY(${postIds})
+        `;
+        userVotes.forEach(row => {
+            userVotesMap.set(row.post_id, row.vote);
+        });
+        }
+
+        // 5. Combine everything into EnrichedPost[]
+        const enrichedPosts: EnrichedPost[] = rawPosts.map(post => ({
+        post,
+        commentsAmount: commentCountsMap.get(post.id) ?? 0,
+        upvotesAmount: votesMap.get(post.id)?.upvotes ?? 0,
+        downvotesAmount: votesMap.get(post.id)?.downvotes ?? 0,
+        voted: userVotesMap.get(post.id) ?? null
+        }));
+
+        return enrichedPosts;
+        
     } catch (error) {
         console.log(error);
         return [];
     }
 }
 //
-type CommentNode = Comment & {
-  children: CommentNode[];
-};
 
-function buildTree(flatList:Comment[]){
+
+function buildTree(flatList:EnrichedComment[]){
     const idMap: Record<number, CommentNode> = {};
-  const tree: CommentNode[] = [];
-    flatList.forEach(comment => {
-        idMap[comment.id] = {...comment,children: []}
+    const tree: CommentNode[] = [];
+    flatList.forEach(enrichedComment => {
+        idMap[enrichedComment.comment.id] = {...enrichedComment,children: []}
     });
-    flatList.forEach(comment=>{
-        if(comment.parent_id === null) {
-            tree.push(idMap[comment.id]);
+    flatList.forEach(enrichedComment=>{
+        if(enrichedComment.comment.parent_id === null) {
+            tree.push(idMap[enrichedComment.comment.id]);
         } else {
-            const parent = idMap[comment.parent_id];
+            const parent = idMap[enrichedComment.comment.parent_id];
             if (parent) {
-                parent.children.push(idMap[comment.id]);
+                parent.children.push(idMap[enrichedComment.comment.id]);
             }
         }
     })
@@ -183,18 +462,88 @@ function buildTree(flatList:Comment[]){
 
 export async function getPostAndComments(postId:number){
     try {
-        const result = await sql`
+        const userId:number|null = await verifyToken();
+
+        const postResult = await sql`
         SELECT * FROM posts WHERE id=${postId}
         `
-        const post = result[0] as PostType;
-        const comments:Comment[] = await sql`
+        if(postResult.length===0){
+            throw new Error('post not found');
+        }
+        const commentsCountResult = await sql`
+        SELECT COUNT(*) FROM comments WHERE post_id = ${postId}
+        `
+        const upvotesCountResult = await sql`
+        SELECT COUNT(*) FROM post_votes WHERE post_id = ${postId} AND vote = true
+        `
+        const downvotesCountResult = await sql`
+        SELECT COUNT(*) FROM post_votes WHERE post_id = ${postId} AND vote = false
+        `
+        let vote = null;
+        if(userId!==null){
+            const voteResult = await sql`
+            SELECT * FROM post_votes WHERE post_id = ${postId} AND user_id = ${userId} 
+            `
+            if(voteResult.length!==0){
+                vote = voteResult[0].vote??null;
+            }
+        }
+        const enrichedPost:EnrichedPost = {
+            post: postResult[0] as PostType,
+            upvotesAmount:upvotesCountResult[0].count??0,
+            downvotesAmount:downvotesCountResult[0].count??0,
+            voted:vote,
+            commentsAmount:commentsCountResult[0].count??0,
+        }
+        const rawComments:Comment[] = await sql`
         SELECT * FROM comments WHERE post_id=${postId}
         `
-        if(comments.length>0){
-            const tree = buildTree(comments);
-            return ({post:post,tree:tree})
+        if(rawComments.length===0){
+            return {post:enrichedPost,tree:[],userId};
         }
-        return {post:post,tree:[]};
+        const commentIds = rawComments.map(comment=>comment.id);
+        // 3. Get vote counts (upvotes and downvotes)
+        const votesResult = await sql`
+        SELECT comment_id, vote, COUNT(*) as count
+        FROM comment_votes
+        WHERE comment_id = ANY(${commentIds})
+        GROUP BY comment_id, vote
+        `;
+        const votesMap = new Map<number, { upvotes: number; downvotes: number }>();
+        rawComments.forEach(comment => {
+        votesMap.set(comment.id, { upvotes: 0, downvotes: 0 });
+        });
+        votesResult.forEach(row => {
+        const voteInfo = votesMap.get(row.comment_id)!;
+        if (row.vote) {
+            voteInfo.upvotes = Number(row.count);
+        } else {
+            voteInfo.downvotes = Number(row.count);
+        }
+        });
+
+        // 4. Get user vote for each comment (if logged in)
+        const userVotesMap = new Map<number, boolean>();
+        if (userId !== null) {
+        const userVotes = await sql`
+            SELECT comment_id, vote FROM comment_votes
+            WHERE user_id = ${userId} AND comment_id = ANY(${commentIds})
+        `;
+        userVotes.forEach(row => {
+            userVotesMap.set(row.comment_id, row.vote);
+        });
+        }
+
+        // 5. Combine everything into EnrichedComment[]
+        const enrichedComments: EnrichedComment[] = rawComments.map(comment => ({
+        comment,
+        upvotesAmount: votesMap.get(comment.id)?.upvotes ?? 0,
+        downvotesAmount: votesMap.get(comment.id)?.downvotes ?? 0,
+        voted: userVotesMap.get(comment.id) ?? null
+        }));
+
+        const tree = buildTree(enrichedComments);
+        return ({post:enrichedPost,tree:tree,userId:userId})
     } catch (error) {
         console.log(error)
         return `error message: ${error}`;
@@ -224,11 +573,12 @@ export async function getAmountOfComments(postId:number){
         return count;
     } catch (error) {
         console.log(error);
+        return 0;
     }
 }
 //votes(like/dislike for posts and comments)
 //posts
-export async function votePost(vote:boolean,userId:number,postId:number){
+export async function votePost(vote:boolean,postId:number,userId:number){
     try {
         const existing = await sql`
         SELECT vote FROM post_votes
@@ -265,14 +615,15 @@ export async function getPostVotesAmount(postId:number){
         SELECT COUNT(*) FROM post_votes
         WHERE post_id = ${postId} AND vote = false
         `
-        const upVotes = Number(result1[0].count??0);
-        const downVotes = Number(result2[0].count??0);
-        return {upVotes,downVotes};
+        const upvotes = Number(result1[0].count??0);
+        const downvotes = Number(result2[0].count??0);
+        return {upvotes,downvotes};
     } catch (error) {
         console.log(error);
+        return {upvotes:0,downvotes:0}
     }
 }
-export async function checkPostVote(postId:number,userId:number){
+export async function checkPostVote(postId:number,userId:number): Promise<null|boolean>{
     //returns true false or null
     //true means upvote, false means downvote, null means no vote
     try {
@@ -287,10 +638,11 @@ export async function checkPostVote(postId:number,userId:number){
         }
     } catch (error) {
         console.log(error);
+        return null;
     }
 }
 //coments
-export async function voteComment(vote:boolean,userId:number,commentId:number){
+export async function voteComment(vote:boolean,commentId:number,userId:number){
     try {
         const existing = await sql`
         SELECT vote FROM comment_votes
