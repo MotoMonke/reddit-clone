@@ -3,6 +3,7 @@ import type { EnrichedPost } from "@/app/lib/types"
 import Image from "next/image"
 import ComentsIcon from "../icons/comentsIcon"
 import Votes from "../votes/votes"
+import UserLink from "../user/userLink"
 interface PostCardInterface{
     enrichedPost:EnrichedPost,
     userId:number|null
@@ -10,6 +11,7 @@ interface PostCardInterface{
 export default function PostCard({enrichedPost,userId}: PostCardInterface){
     return (
         <div className="flex flex-col pt-8 max-w-[800px] pb-3 hover:bg-[#222222] border-b-1 border-b-gray-600">
+            <UserLink userId={enrichedPost.post.author_id} username={enrichedPost.authorUsername} profileImgUrl={enrichedPost.authorProfPicUrl}/>
             <div className="text-xl">{enrichedPost.post.title}</div>
             {enrichedPost.post.image_url!==null&&<Image className="w-full rounded-2xl" src={enrichedPost.post.image_url!} width={1000} height={1000} alt="post image"/>}
             {enrichedPost.post.text!==null&&<div className="text-[#8BA2AD]">{enrichedPost.post.text}</div>}

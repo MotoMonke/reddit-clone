@@ -1,24 +1,24 @@
-import { Notification } from "@/app/lib/types"
+import { EnrichedNotification } from "@/app/lib/types"
 import UserLink from "../user/userLink"
 import Link from "next/link"
 interface CardInterface{
-    notification:Notification
+   enrichedNotification:EnrichedNotification
 }
-export default function NotificationCard({notification}:CardInterface){
+export default function NotificationCard({enrichedNotification}:CardInterface){
     return(
         <div className="p-5">
-            {notification.comment_id===null&&<div>
+            {enrichedNotification.notification.comment_id===null&&<div>
                 <div className="flex gap-2">
-                    <UserLink userId={notification.author_id}/>
+                    <UserLink userId={enrichedNotification.notification.author_id} username={enrichedNotification.authorUsername} profileImgUrl={enrichedNotification.authorProfPicUrl}/>
                     <p>commented under your post:</p>
-                    <Link className="hover:underline text-blue-500" href={`/post/${notification.post_id}`}>link</Link>    
+                    <Link className="hover:underline text-blue-500" href={`/post/${enrichedNotification.notification.post_id}`}>link</Link>    
                 </div>    
             </div>}
-            {notification.comment_id!==null&&<div>
+            {enrichedNotification.notification.comment_id!==null&&<div>
                 <div className="flex gap-2">
-                    <UserLink userId={notification.author_id}/>
+                    <UserLink userId={enrichedNotification.notification.author_id} username={enrichedNotification.authorUsername} profileImgUrl={enrichedNotification.authorProfPicUrl}/>
                     <p>answered your comment under post:</p>
-                    <Link className="hover:underline text-blue-500" href={`/post/${notification.post_id}`}>link</Link>
+                    <Link className="hover:underline text-blue-500" href={`/post/${enrichedNotification.notification.post_id}`}>link</Link>
                 </div>    
             </div>}
         </div>

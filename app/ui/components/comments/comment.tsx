@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Comment, CommentNode } from "@/app/lib/types";
+import type { Comment, CommentNode,User } from "@/app/lib/types";
 import Votes from "../votes/votes";
 import UserLink from "../user/userLink";
 import CommnetInput from "./commentInput";
@@ -12,13 +12,19 @@ export default function OneComment({enrichedComment,postId,userId}:OneCommentPro
     const [commentArray,setCommentArray] = useState<CommentNode[]>(enrichedComment.children||[]);
     const [isExpanded, setIsExpanded] = useState(true);
     
-    function onCommentCreated(newComment:Comment){
+    interface functionInterface{
+        comment:Comment,
+        author:User,
+    }
+    function onCommentCreated({comment,author}:functionInterface){
         //enriching comment to match commentArray data type
         const commentNode:CommentNode = {
-            comment:newComment,
+            comment:comment,
             upvotesAmount:0,
             downvotesAmount:0,
             voted:null,
+            authorUsername:author.username,
+            authorProfPicUrl:author.profile_img_url,
             children:[]
         }
         setCommentArray(prev=>[...prev,commentNode]);
@@ -36,7 +42,7 @@ export default function OneComment({enrichedComment,postId,userId}:OneCommentPro
                 
                 <div className="flex-1">
                     <div className="flex items-center gap-1 text-xs text-gray-500 mb-1">
-                        {/*<UserLink userId={enrichedComment.comment.author_id}/> */}
+                        <UserLink userId={enrichedComment.comment.author_id} username={enrichedComment.authorUsername} profileImgUrl={enrichedComment.authorProfPicUrl}/>
                         <span>•</span>
                         <span>{new Date(enrichedComment.comment.created_at!).toLocaleString()}</span>
                     </div>

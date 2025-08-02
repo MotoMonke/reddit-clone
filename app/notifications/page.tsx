@@ -1,6 +1,6 @@
 import NotificationList from "../ui/components/notifications/notificationsList";
 import { verifyToken } from "../lib/jwt";
-import { getNotifications,markNotificationsAsRead } from "../lib/db";
+import { getNotifications} from "../lib/db";
 import { redirect } from "next/navigation";
 export default async function Page(){
     const userId = await verifyToken();
@@ -14,6 +14,6 @@ export default async function Page(){
         )
     }
     return(
-        <NotificationList notifications={notifications}/>
+        <NotificationList enrichedNotifications={notifications}/>
     )
 }

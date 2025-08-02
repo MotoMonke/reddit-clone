@@ -17,6 +17,8 @@ export type EnrichedPost = {
   downvotesAmount:number,
   voted:null|boolean,
   commentsAmount:number,
+  authorUsername:string|null,
+  authorProfPicUrl:string|null,
 }
 export type Comment = {
   id:number,
@@ -31,6 +33,8 @@ export type EnrichedComment = {
   upvotesAmount:number,
   downvotesAmount:number,
   voted:null|boolean,
+  authorUsername:string|null,
+  authorProfPicUrl:string|null,
 }
 export type User = {
     id:number,
@@ -38,6 +42,12 @@ export type User = {
     password:string,
     username:string,
     profile_img_url:string|null,
+}
+//it's for UserLink element which needs only user id, username and profile image url
+export type ShortUser = {
+  id:number,
+  username:string,
+  profile_img_url:string|null
 }
 export type Notification = {
   id:number,
@@ -47,6 +57,11 @@ export type Notification = {
   comment_id:number|null,
   is_read:boolean,
   created_at:Date
+}
+export type EnrichedNotification = {
+  notification:Notification,
+  authorUsername:string|null,
+  authorProfPicUrl:string|null,
 }
 export type PostVote = {
   id:number,

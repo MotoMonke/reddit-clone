@@ -1,13 +1,16 @@
 'use client'
-import { useState,useEffect } from "react";
+import { useState} from "react";
 import { createComment } from "@/app/lib/db";
-import { verifyToken } from "@/app/lib/jwt";
 import { useRouter } from "next/navigation";
-import type { Comment } from "@/app/lib/types";
+import type { Comment,User } from "@/app/lib/types";
+interface functionInterface{
+        comment:Comment,
+        author:User,
+}
 interface CommentInput{
     postId:number,
     parentId:number|null,
-    onCommentCreated:(newComment:Comment)=>void,
+    onCommentCreated:({comment,author}:functionInterface)=>void,
     userId:number|null
 }
 export default function CommnetInput({postId,parentId,onCommentCreated,userId}:CommentInput){

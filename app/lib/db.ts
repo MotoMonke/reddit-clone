@@ -1,7 +1,7 @@
 'use server'
 import postgres from "postgres";
 import bcrypt from 'bcryptjs';
-import type { User,Notification,PostType,EnrichedPost,Comment,EnrichedComment,CommentNode } from "./types"
+import type { User,Notification,PostType,EnrichedPost,Comment,EnrichedComment,CommentNode, ShortUser, EnrichedNotification } from "./types"
 import { verifyToken } from "./jwt";
 import { redirect } from "next/navigation";
 const connectionString = process.env.PSQL
@@ -130,14 +130,27 @@ export async function getPostsForGlobalFeed(offset: number): Promise<EnrichedPos
         userVotesMap.set(row.post_id, row.vote);
       });
     }
+    //geting post authors
+    const postAuthorsMap = new Map<number,ShortUser>();
+    const postAuthors = await sql`
+        SELECT DISTINCT users.id, users.username, users.profile_img_url
+        FROM users
+        JOIN posts ON posts.author_id = users.id
+        WHERE posts.id = ANY(${postIds})
 
+    `
+    postAuthors.forEach(row =>{
+        postAuthorsMap.set(row.id,(row as ShortUser));
+    });
     // 5. Combine everything into EnrichedPost[]
     const enrichedPosts: EnrichedPost[] = rawPosts.map(post => ({
       post,
       commentsAmount: commentCountsMap.get(post.id) ?? 0,
       upvotesAmount: votesMap.get(post.id)?.upvotes ?? 0,
       downvotesAmount: votesMap.get(post.id)?.downvotes ?? 0,
-      voted: userVotesMap.get(post.id) ?? null
+      voted: userVotesMap.get(post.id) ?? null,
+      authorUsername:postAuthorsMap.get(post.author_id)?.username??null,
+      authorProfPicUrl:postAuthorsMap.get(post.author_id)?.profile_img_url??null,
     }));
 
     return enrichedPosts;
@@ -205,14 +218,27 @@ export async function getUserPosts(offset:number,authorId:number): Promise<Enric
         userVotesMap.set(row.post_id, row.vote);
       });
     }
+    //geting post authors
+    const postAuthorsMap = new Map<number,ShortUser>();
+    const postAuthors = await sql`
+        SELECT DISTINCT users.id, users.username, users.profile_img_url
+        FROM users
+        JOIN posts ON posts.author_id = users.id
+        WHERE posts.id = ANY(${postIds})
 
+    `
+    postAuthors.forEach(row =>{
+        postAuthorsMap.set(row.id,(row as ShortUser));
+    });
     // 5. Combine everything into EnrichedPost[]
     const enrichedPosts: EnrichedPost[] = rawPosts.map(post => ({
       post,
       commentsAmount: commentCountsMap.get(post.id) ?? 0,
       upvotesAmount: votesMap.get(post.id)?.upvotes ?? 0,
       downvotesAmount: votesMap.get(post.id)?.downvotes ?? 0,
-      voted: userVotesMap.get(post.id) ?? null
+      voted: userVotesMap.get(post.id) ?? null,
+      authorUsername:postAuthorsMap.get(post.author_id)?.username??null,
+      authorProfPicUrl:postAuthorsMap.get(post.author_id)?.profile_img_url??null,
     }));
 
     return enrichedPosts;
@@ -277,14 +303,27 @@ export async function getCommentedPosts(offset:number,comentAuthorId:number): Pr
             userVotesMap.set(row.post_id, row.vote);
         });
         }
+        //geting post authors
+        const postAuthorsMap = new Map<number,ShortUser>();
+        const postAuthors = await sql`
+            SELECT DISTINCT users.id, users.username, users.profile_img_url
+            FROM users
+            JOIN posts ON posts.author_id = users.id
+            WHERE posts.id = ANY(${postIds})
 
+        `
+        postAuthors.forEach(row =>{
+            postAuthorsMap.set(row.id,(row as ShortUser));
+        });
         // 5. Combine everything into EnrichedPost[]
         const enrichedPosts: EnrichedPost[] = rawPosts.map(post => ({
         post,
         commentsAmount: commentCountsMap.get(post.id) ?? 0,
         upvotesAmount: votesMap.get(post.id)?.upvotes ?? 0,
         downvotesAmount: votesMap.get(post.id)?.downvotes ?? 0,
-        voted: userVotesMap.get(post.id) ?? null
+        voted: userVotesMap.get(post.id) ?? null,
+        authorUsername:postAuthorsMap.get(post.author_id)?.username??null,
+        authorProfPicUrl:postAuthorsMap.get(post.author_id)?.profile_img_url??null,
         }));
 
         return enrichedPosts;
@@ -349,14 +388,27 @@ export async function getVotedPosts(offset:number,voteAuthorId:number): Promise<
             userVotesMap.set(row.post_id, row.vote);
         });
         }
+        //geting post authors
+        const postAuthorsMap = new Map<number,ShortUser>();
+        const postAuthors = await sql`
+            SELECT DISTINCT users.id, users.username, users.profile_img_url
+            FROM users
+            JOIN posts ON posts.author_id = users.id
+            WHERE posts.id = ANY(${postIds})
 
+        `
+        postAuthors.forEach(row =>{
+            postAuthorsMap.set(row.id,(row as ShortUser));
+        });
         // 5. Combine everything into EnrichedPost[]
         const enrichedPosts: EnrichedPost[] = rawPosts.map(post => ({
         post,
         commentsAmount: commentCountsMap.get(post.id) ?? 0,
         upvotesAmount: votesMap.get(post.id)?.upvotes ?? 0,
         downvotesAmount: votesMap.get(post.id)?.downvotes ?? 0,
-        voted: userVotesMap.get(post.id) ?? null
+        voted: userVotesMap.get(post.id) ?? null,
+        authorUsername:postAuthorsMap.get(post.author_id)?.username??null,
+        authorProfPicUrl:postAuthorsMap.get(post.author_id)?.profile_img_url??null,
         }));
 
         return enrichedPosts;
@@ -421,14 +473,27 @@ export async function searchPosts(offset:number,query:string):Promise<EnrichedPo
             userVotesMap.set(row.post_id, row.vote);
         });
         }
+        //geting post authors
+        const postAuthorsMap = new Map<number,ShortUser>();
+        const postAuthors = await sql`
+            SELECT DISTINCT users.id, users.username, users.profile_img_url
+            FROM users
+            JOIN posts ON posts.author_id = users.id
+            WHERE posts.id = ANY(${postIds})
 
+        `
+        postAuthors.forEach(row =>{
+            postAuthorsMap.set(row.id,(row as ShortUser));
+        });
         // 5. Combine everything into EnrichedPost[]
         const enrichedPosts: EnrichedPost[] = rawPosts.map(post => ({
         post,
         commentsAmount: commentCountsMap.get(post.id) ?? 0,
         upvotesAmount: votesMap.get(post.id)?.upvotes ?? 0,
         downvotesAmount: votesMap.get(post.id)?.downvotes ?? 0,
-        voted: userVotesMap.get(post.id) ?? null
+        voted: userVotesMap.get(post.id) ?? null,
+        authorUsername:postAuthorsMap.get(post.author_id)?.username??null,
+        authorProfPicUrl:postAuthorsMap.get(post.author_id)?.profile_img_url??null,
         }));
 
         return enrichedPosts;
@@ -470,6 +535,7 @@ export async function getPostAndComments(postId:number){
         if(postResult.length===0){
             throw new Error('post not found');
         }
+        const post = postResult[0] as PostType;
         const commentsCountResult = await sql`
         SELECT COUNT(*) FROM comments WHERE post_id = ${postId}
         `
@@ -488,12 +554,15 @@ export async function getPostAndComments(postId:number){
                 vote = voteResult[0].vote??null;
             }
         }
+        const user = await getUserById(post.author_id);
         const enrichedPost:EnrichedPost = {
-            post: postResult[0] as PostType,
+            post: post,
             upvotesAmount:upvotesCountResult[0].count??0,
             downvotesAmount:downvotesCountResult[0].count??0,
             voted:vote,
             commentsAmount:commentsCountResult[0].count??0,
+            authorUsername:user!==null?user.username:null,
+            authorProfPicUrl:user!==null?user.profile_img_url:null,
         }
         const rawComments:Comment[] = await sql`
         SELECT * FROM comments WHERE post_id=${postId}
@@ -533,13 +602,26 @@ export async function getPostAndComments(postId:number){
             userVotesMap.set(row.comment_id, row.vote);
         });
         }
+        //geting authors for each comment
+        const commentAuthorsMap = new Map<number,ShortUser>();
+        const commentAuthors = await sql`
+            SELECT DISTINCT users.id, users.username, users.profile_img_url
+            FROM users
+            JOIN comments ON comments.author_id = users.id
+            WHERE comments.id = ANY(${commentIds})
 
+        `
+        commentAuthors.forEach(row =>{
+            commentAuthorsMap.set(row.id,(row as ShortUser));
+        });
         // 5. Combine everything into EnrichedComment[]
         const enrichedComments: EnrichedComment[] = rawComments.map(comment => ({
         comment,
         upvotesAmount: votesMap.get(comment.id)?.upvotes ?? 0,
         downvotesAmount: votesMap.get(comment.id)?.downvotes ?? 0,
-        voted: userVotesMap.get(comment.id) ?? null
+        voted: userVotesMap.get(comment.id) ?? null,
+        authorUsername: commentAuthorsMap.get(comment.author_id)?.username??null,
+        authorProfPicUrl:commentAuthorsMap.get(comment.author_id)?.profile_img_url??null,
         }));
 
         const tree = buildTree(enrichedComments);
@@ -551,13 +633,22 @@ export async function getPostAndComments(postId:number){
 }
 export async function createComment(authorId:number,postId:number,parentId:number|null,body:string){
     try {
+        const author = await getUserById(authorId);
+        if(author===null){
+            throw new Error('something went wrong')
+        }
         const result = await sql`
         INSERT INTO comments (author_id,post_id,parent_id,body) 
         VALUES (${authorId},${postId},${parentId},${body})
         RETURNING *
         `
+        if(result.length===0){
+            throw new Error('something went wrong')
+        }
         await createNotification(postId,authorId,parentId);
-        return result[0] as unknown as Comment;
+        const comment = result[0] as Comment;
+
+        return {comment:comment,author:author};
     } catch (error) {
         console.log(error);
         return `error message: ${error}`;
@@ -770,11 +861,28 @@ export async function getNotifications(userId:number){
         const notifications:Notification[] = await sql`
         SELECT * FROM notifications WHERE receiver_id = ${userId}
         `
-        if(notifications.length>0){
-            return notifications;
-        }else{
+        if(notifications.length===0){
             return [];
         }
+        const notificationIds = notifications.map(row=>row.id);
+        //geting authors for each notification
+        const notificationAuthorsMap = new Map<number,ShortUser>();
+        const notificationAuthors = await sql`
+            SELECT DISTINCT users.id, users.username, users.profile_img_url
+            FROM users
+            JOIN notifications ON notifications.author_id = users.id
+            WHERE notifications.id = ANY(${notificationIds})
+        `
+        notificationAuthors.forEach(row =>{
+            notificationAuthorsMap.set(row.id,(row as ShortUser));
+        });
+        // 5. Combine everything into EnrichedNotification[]
+        const enrichedNotifications:EnrichedNotification[] = notifications.map((notification)=>({
+            notification,
+            authorUsername:notificationAuthorsMap.get(notification.author_id)?.username??null,
+            authorProfPicUrl:notificationAuthorsMap.get(notification.author_id)?.profile_img_url??null,
+        }))
+        return enrichedNotifications;
     } catch (error) {
         console.log(error);
         return `error message: ${error}`
